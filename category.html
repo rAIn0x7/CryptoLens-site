@@ -82,16 +82,13 @@ async function init() {
   if (tag) {
     document.getElementById('cat-title').textContent = `#${tag}`;
     document.getElementById('cat-desc').textContent = `Articles tagged with #${tag}`;
-    currentTag = tag;
+    filterByTag(tag);
   } else {
-    currentCategory = cat;
     document.getElementById('cat-title').textContent =
       { all:'All Articles', cross:'Crypto × AI', crypto:'Crypto', ai:'AI', regulation:'Regulation', onchain:'On-chain' }[cat] || cat;
     document.getElementById('cat-desc').textContent = CAT_DESCS[cat] || '';
-    document.querySelector(`.nav-filter[data-cat="${cat}"]`)?.classList.add('active');
+    setCategory(cat);
   }
-
-  await loadFeed(true);
 }
 
 async function handleModalLogin() {

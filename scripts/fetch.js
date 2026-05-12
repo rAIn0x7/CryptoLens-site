@@ -8,7 +8,7 @@ const supabase = createClient(
 );
 
 const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genai.getGenerativeModel({ model: 'gemini-2.0-flash' });
+const model = genai.getGenerativeModel({ model: 'gemini-2.5-flash' });
 const parser = new Parser({ timeout: 10000 });
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
