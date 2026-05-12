@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="CryptoLens — Filtered crypto × AI intelligence. Save 2 hours daily on noise.">
+<title>CryptoLens — Crypto × AI Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay hidden" id="auth-modal">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="CL.auth.closeLoginModal()">×</button>
+    <h2>Sign in to CryptoLens</h2>
+    <p>Enter your email — we'll send a magic link. No password needed.</p>
+    <input type="email" id="modal-email" placeholder="you@example.com">
+    <button class="btn btn-primary" style="width:100%" onclick="handleModalLogin()">Send Magic Link</button>
+    <p class="msg" id="modal-msg"></p>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <span class="nav-logo">CRYPTO<span>LENS</span></span>
+  <div class="nav-filters">
+    <button class="nav-filter active" data-cat="all"        onclick="setCategory('all')">ALL</button>
+    <button class="nav-filter"        data-cat="cross"      onclick="setCategory('cross')">CROSS</button>
+    <button class="nav-filter"        data-cat="crypto"     onclick="setCategory('crypto')">CRYPTO</button>
+    <button class="nav-filter"        data-cat="ai"         onclick="setCategory('ai')">AI</button>
+    <button class="nav-filter"        data-cat="regulation" onclick="setCategory('regulation')">REGULATION</button>
+    <button class="nav-filter"        data-cat="onchain"    onclick="setCategory('onchain')">ON-CHAIN</button>
+  </div>
+  <div class="nav-actions">
+    <span class="badge badge-cat-cross hidden" id="nav-pro-label">PRO</span>
+    <button class="btn btn-ghost btn-sm" id="nav-login-btn"  onclick="CL.auth.openLoginModal()">Sign In</button>
+    <button class="btn btn-ghost btn-sm hidden" id="nav-logout-btn" onclick="CL.auth.signOut()">Sign Out</button>
+    <a href="subscribe.html" class="btn btn-primary btn-sm">Subscribe</a>
+  </div>
+</nav>
+
+<!-- HERO BAND -->
+<div class="hero-band">
+  <h1>Crypto <span class="accent">×</span> AI Intelligence</h1>
+  <p>Filtered signal from 11 sources · Updated every 2 hours · Scored by Gemini AI</p>
+</div>
+
+<div class="container">
+  <!-- TODAY'S TOP -->
+  <div class="top-section">
+    <div class="section-label">Today's Top Signal</div>
+    <div class="top-grid" id="top-grid">
+      <div class="card skeleton" style="height:160px"></div>
+      <div class="card skeleton" style="height:160px"></div>
+      <div class="card skeleton" style="height:160px"></div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="page-grid">
+    <main>
+      <div class="feed" id="feed">
+        <div class="card skeleton" style="height:140px"></div>
+        <div class="card skeleton" style="height:140px"></div>
+        <div class="card skeleton" style="height:140px"></div>
+      </div>
+      <div class="load-more">
+        <button id="load-more-btn" onclick="loadFeed()">Load more</button>
+      </div>
+    </main>
+
+    <aside class="sidebar">
+      <div class="sidebar-block sidebar-subscribe">
+        <div class="sidebar-title">Free Weekly Signal</div>
+        <p>Top 10 stories every Monday. No spam.</p>
+        <input type="email" id="sidebar-email" placeholder="your@email.com">
+        <button class="btn btn-primary" style="width:100%" onclick="sidebarSubscribe()">Subscribe Free</button>
+        <p class="msg" id="sidebar-msg"></p>
+      </div>
+
+      <div class="sidebar-block">
+        <div class="sidebar-title">Trending Tags</div>
+        <div class="sidebar-tags" id="sidebar-tags"></div>
+      </div>
+
+      <div class="sidebar-block affiliate-block">
+        <span class="aff-label">Sponsored</span>
+        <p>Trade crypto on <a href="https://accounts.binance.com/register?ref=YOUR_REF" target="_blank" rel="noopener" onclick="CL.affiliate.track('binance', null)">Binance</a> — earn rebates on every trade.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<footer class="footer">
+  <p class="footer-disclaimer">CryptoLens aggregates information from third-party sources for informational purposes only. Nothing on this site constitutes financial or investment advice. Always do your own research before making any investment decisions. Cryptocurrency investments carry significant risk.</p>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="subscribe.html">Subscribe</a>
+    <a href="about.html">About</a>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/config.js"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/app.js"></script>
+<script src="assets/affiliate.js"></script>
+<script>
+async function init() {
+  await CL.auth.initAuth();
+  await loadTodaysTop();
+  await loadFeed(true);
+  await loadSidebarTags();
+}
+
+async function handleModalLogin() {
+  const email = document.getElementById('modal-email').value.trim();
+  const msg = document.getElementById('modal-msg');
+  const error = await CL.auth.sendMagicLink(email);
+  if (error) { msg.className = 'msg msg-error'; msg.textContent = error.message; }
+  else { msg.className = 'msg msg-success'; msg.textContent = 'Check your email for the magic link!'; }
+}
+
+async function sidebarSubscribe() {
+  const email = document.getElementById('sidebar-email').value.trim();
+  const msg = document.getElementById('sidebar-msg');
+  const { error } = await handleSubscribe(email);
+  if (error) { msg.className = 'msg msg-error'; msg.textContent = 'Already subscribed or invalid email.'; }
+  else { msg.className = 'msg msg-success'; msg.textContent = 'Subscribed! Check your inbox Monday.'; }
+}
+
+document.addEventListener('authChanged', () => { loadFeed(true); loadTodaysTop(); });
+
+init();
+</script>
+</body>
+</html>
