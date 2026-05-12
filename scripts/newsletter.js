@@ -73,7 +73,7 @@ function buildEmail(articles, isPro, isWeekly) {
 
     <div style="border:1px solid rgba(0,212,255,0.12);border-radius:6px;padding:16px;margin:24px 0;text-align:center">
       <p style="font-family:monospace;font-size:10px;color:#6b7280;text-transform:uppercase;margin:0 0 8px">Partner</p>
-      <p style="font-size:13px;color:#9ca3af;margin:0">Trade on <a href="https://accounts.binance.com/register?ref=YOUR_REF" style="color:#00d4ff">Binance</a> — earn rebates on every trade. ${isPro ? '' : '<a href="https://lens.qizh.space/subscribe.html" style="color:#7c3aed">Upgrade to Pro</a> for daily delivery + Editor\'s Take.'}</p>
+      <p style="font-size:13px;color:#9ca3af;margin:0">Trade on <a href="https://www.bsmkweb.cc/register?ref=1216493484" style="color:#00d4ff">Binance</a> — earn rebates on every trade. ${isPro ? '' : '<a href="https://lens.qizh.space/subscribe.html" style="color:#7c3aed">Upgrade to Pro</a> for daily delivery + Editor\'s Take.'}</p>
     </div>
 
     <div style="border-top:1px solid rgba(0,212,255,0.1);padding-top:16px;font-size:11px;color:#6b7280;line-height:1.6">
