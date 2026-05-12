@@ -1,0 +1,15 @@
+{
+  "name": "cryptolens-site",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "fetch": "node scripts/fetch.js",
+    "newsletter": "node scripts/newsletter.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@supabase/supabase-js": "^2.39.0",
+    "resend": "^4.0.0",
+    "rss-parser": "^3.13.0"
+  }
+}
