@@ -25,7 +25,7 @@ async function loadSources() {
 async function fetchRSS(source) {
   try {
     const feed = await parser.parseURL(source.feed_url);
-    return feed.items.slice(0, 20).map(item => ({
+    return feed.items.slice(0, 5).map(item => ({
       source_id: source.id,
       source_name: source.name,
       source_category: source.category,
