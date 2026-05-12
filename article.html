@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoLens — Article</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="modal-overlay hidden" id="auth-modal">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="CL.auth.closeLoginModal()">×</button>
+    <h2>Sign in to CryptoLens</h2>
+    <p>Enter your email — we'll send a magic link.</p>
+    <input type="email" id="modal-email" placeholder="you@example.com">
+    <button class="btn btn-primary" style="width:100%" onclick="handleModalLogin()">Send Magic Link</button>
+    <p class="msg" id="modal-msg"></p>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">CRYPTO<span>LENS</span></a>
+  <div class="nav-filters"></div>
+  <div class="nav-actions">
+    <span class="badge badge-cat-cross hidden" id="nav-pro-label">PRO</span>
+    <button class="btn btn-ghost btn-sm" id="nav-login-btn"  onclick="CL.auth.openLoginModal()">Sign In</button>
+    <button class="btn btn-ghost btn-sm hidden" id="nav-logout-btn" onclick="CL.auth.signOut()">Sign Out</button>
+    <a href="subscribe.html" class="btn btn-primary btn-sm">Subscribe</a>
+  </div>
+</nav>
+
+<div class="article-page" id="article-content">
+  <div class="card skeleton" style="height:400px"></div>
+</div>
+
+<footer class="footer">
+  <p class="footer-disclaimer">CryptoLens aggregates information from third-party sources for informational purposes only. Nothing on this site constitutes financial or investment advice. Always do your own research before making any investment decisions. Cryptocurrency investments carry significant risk.</p>
+  <div class="footer-links">
+    <a href="index.html">Home</a><a href="subscribe.html">Subscribe</a><a href="about.html">About</a>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/config.js"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/app.js"></script>
+<script src="assets/affiliate.js"></script>
+<script>
+async function init() {
+  await CL.auth.initAuth();
+
+  const id = new URLSearchParams(location.search).get('id');
+  if (!id) { document.getElementById('article-content').innerHTML = '<p style="color:var(--muted);padding:2rem">Article not found.</p>'; return; }
+
+  const { data: article } = await CL.supabase
+    .from('articles_public')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (!article) { document.getElementById('article-content').innerHTML = '<p style="color:var(--muted);padding:2rem">Article not found.</p>'; return; }
+
+  document.title = `${article.title} — CryptoLens`;
+
+  const catClass = { cross:'badge-cat-cross', crypto:'badge-cat-crypto', ai:'badge-cat-ai', regulation:'badge-cat-regulation', onchain:'badge-cat-onchain' }[article.category] || 'badge-cat-crypto';
+  const tags = (article.tags || []).map(t => `<span class="tag" onclick="location.href='category.html?tag=${t}'">#${t}</span>`).join('');
+
+  let editorSection = '';
+  if (article.editor_note) {
+    editorSection = `
+      <div class="article-editor-note">
+        <div class="editor-note-label">Editor's Take</div>
+        <p style="font-size:0.9rem;line-height:1.7;color:var(--muted)">${article.editor_note}</p>
+      </div>`;
+  } else if (article.is_pro && !window.CL.isPro()) {
+    editorSection = `
+      <div class="article-editor-note">
+        <div class="editor-note-label">Editor's Take — Pro Only</div>
+        <div class="paywall-blur">
+          <p style="font-size:0.9rem;line-height:1.7;color:var(--muted);filter:blur(4px);user-select:none">
+            This analysis provides strategic context for investors. Upgrade to Pro to read the full editor note and unlock all premium intelligence.
+          </p>
+          <div class="paywall-cta"><span>Pro only —</span><a href="subscribe.html">Upgrade $15/mo</a></div>
+        </div>
+      </div>`;
+  }
+
+  document.getElementById('article-content').innerHTML = `
+    <a href="javascript:history.back()" class="article-back">← Back</a>
+    <div class="article-header">
+      <div class="article-meta">
+        <span class="badge ${catClass}">${article.category}</span>
+        <span class="score-badge ${scoreClass(article.importance_score)}">●${article.importance_score}</span>
+        <span class="card-source">${article.source_name || ''} · ${timeAgo(article.published_at)}</span>
+      </div>
+      <h1 class="article-title" style="margin-top:0.75rem">${article.title}</h1>
+      ${tags ? `<div class="card-tags" style="margin-top:0.5rem">${tags}</div>` : ''}
+    </div>
+    <div class="article-summary">${article.summary || ''}</div>
+    ${editorSection}
+    <a class="article-original-link" href="${article.original_url}" target="_blank" rel="noopener">
+      Read original article ↗
+    </a>
+    <p style="font-size:0.72rem;color:var(--muted);margin-top:3rem">
+      CryptoLens aggregates information from third-party sources for informational purposes only. Nothing on this site constitutes financial or investment advice.
+    </p>`;
+}
+
+async function handleModalLogin() {
+  const email = document.getElementById('modal-email').value.trim();
+  const msg = document.getElementById('modal-msg');
+  const error = await CL.auth.sendMagicLink(email);
+  if (error) { msg.className='msg msg-error'; msg.textContent=error.message; }
+  else { msg.className='msg msg-success'; msg.textContent='Check your email!'; }
+}
+
+document.addEventListener('authChanged', init);
+init();
+</script>
+</body>
+</html>
