@@ -103,12 +103,13 @@ async function sendBatch(emails, subject, html, tag) {
   for (let i = 0; i < emails.length; i += 50) chunks.push(emails.slice(i, i + 50));
 
   for (const chunk of chunks) {
-    const { error } = await resend.emails.send({
+    const messages = chunk.map(email => ({
       from: 'CryptoLens <signal@lens.qizh.space>',
-      to: chunk,
+      to: email,
       subject,
       html
-    });
+    }));
+    const { error } = await resend.batch.send(messages);
     if (error) console.error(`  Send error (${tag}):`, error);
     else console.log(`  Sent to ${chunk.length} ${tag} subscribers`);
   }
