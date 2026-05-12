@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoLens — Subscribe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">CRYPTO<span>LENS</span></a>
+  <div class="nav-filters"></div>
+  <div class="nav-actions">
+    <a href="index.html" class="btn btn-ghost btn-sm">← Back</a>
+  </div>
+</nav>
+
+<div class="subscribe-page">
+  <h1>Get the Signal</h1>
+  <p class="sub-lead">Filtered crypto × AI intelligence. Save 2 hours daily on noise.</p>
+
+  <div class="email-input-row">
+    <input type="email" id="sub-email" placeholder="your@email.com">
+    <button class="btn btn-primary" onclick="doSubscribe()">Subscribe Free</button>
+  </div>
+  <p class="msg" id="sub-msg"></p>
+
+  <div class="plans-grid" style="margin-top:2.5rem">
+    <div class="plan-card">
+      <div class="plan-name">Free</div>
+      <div class="plan-price">$0 <span>/ forever</span></div>
+      <ul class="plan-features">
+        <li class="has">Full article feed &amp; summaries</li>
+        <li class="has">Weekly Newsletter (Top 10)</li>
+        <li class="has">Category &amp; tag filters</li>
+        <li>Editor's Take (Pro only)</li>
+        <li>Daily Newsletter</li>
+        <li>7+ day article archive</li>
+      </ul>
+      <button class="btn btn-ghost" style="width:100%" onclick="document.getElementById('sub-email').focus()">Get Started Free</button>
+    </div>
+
+    <div class="plan-card featured">
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">$15 <span>/ month</span></div>
+      <ul class="plan-features">
+        <li class="has">Everything in Free</li>
+        <li class="has">Editor's Take on every article</li>
+        <li class="has">Daily Newsletter (Top 5 + analysis)</li>
+        <li class="has">Full article archive</li>
+        <li class="has">On-chain data interpretation</li>
+      </ul>
+      <a href="YOUR_STRIPE_PAYMENT_LINK_MONTHLY" class="btn btn-primary" style="width:100%;display:block;text-align:center">Upgrade to Pro →</a>
+      <p style="text-align:center;font-size:0.72rem;color:var(--muted);margin-top:0.5rem">
+        Or <a href="YOUR_STRIPE_PAYMENT_LINK_YEARLY" style="color:var(--cyan)">$120/year</a> (save $60)
+      </p>
+    </div>
+  </div>
+
+  <p style="font-size:0.72rem;color:var(--muted);margin-top:2.5rem;line-height:1.6">
+    CryptoLens aggregates information from third-party sources for informational purposes only. Nothing on this site constitutes financial or investment advice. Always do your own research before making any investment decisions. Cryptocurrency investments carry significant risk.
+  </p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/config.js"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/app.js"></script>
+<script src="assets/affiliate.js"></script>
+<script>
+async function doSubscribe() {
+  const email = document.getElementById('sub-email').value.trim();
+  const msg = document.getElementById('sub-msg');
+  const { error } = await handleSubscribe(email);
+  if (error) { msg.className='msg msg-error'; msg.textContent='Already subscribed or invalid email.'; }
+  else { msg.className='msg msg-success'; msg.textContent='Subscribed! Weekly newsletter every Monday.'; }
+}
+CL.auth.initAuth();
+</script>
+</body>
+</html>
