@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoLens — Browse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="modal-overlay hidden" id="auth-modal">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="CL.auth.closeLoginModal()">×</button>
+    <h2>Sign in to CryptoLens</h2>
+    <p>Enter your email — we'll send a magic link.</p>
+    <input type="email" id="modal-email" placeholder="you@example.com">
+    <button class="btn btn-primary" style="width:100%" onclick="handleModalLogin()">Send Magic Link</button>
+    <p class="msg" id="modal-msg"></p>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">CRYPTO<span>LENS</span></a>
+  <div class="nav-filters">
+    <button class="nav-filter" data-cat="all"        onclick="setCategory('all')">ALL</button>
+    <button class="nav-filter" data-cat="cross"      onclick="setCategory('cross')">CROSS</button>
+    <button class="nav-filter" data-cat="crypto"     onclick="setCategory('crypto')">CRYPTO</button>
+    <button class="nav-filter" data-cat="ai"         onclick="setCategory('ai')">AI</button>
+    <button class="nav-filter" data-cat="regulation" onclick="setCategory('regulation')">REGULATION</button>
+    <button class="nav-filter" data-cat="onchain"    onclick="setCategory('onchain')">ON-CHAIN</button>
+  </div>
+  <div class="nav-actions">
+    <span class="badge badge-cat-cross hidden" id="nav-pro-label">PRO</span>
+    <button class="btn btn-ghost btn-sm" id="nav-login-btn"  onclick="CL.auth.openLoginModal()">Sign In</button>
+    <button class="btn btn-ghost btn-sm hidden" id="nav-logout-btn" onclick="CL.auth.signOut()">Sign Out</button>
+    <a href="subscribe.html" class="btn btn-primary btn-sm">Subscribe</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="category-header">
+    <h1 id="cat-title">All Articles</h1>
+    <p id="cat-desc"></p>
+  </div>
+  <div class="feed" id="feed"></div>
+  <div class="load-more">
+    <button id="load-more-btn" onclick="loadFeed()">Load more</button>
+  </div>
+</div>
+
+<footer class="footer">
+  <p class="footer-disclaimer">CryptoLens aggregates information from third-party sources for informational purposes only. Nothing on this site constitutes financial or investment advice. Always do your own research before making any investment decisions. Cryptocurrency investments carry significant risk.</p>
+  <div class="footer-links">
+    <a href="index.html">Home</a><a href="subscribe.html">Subscribe</a><a href="about.html">About</a>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/config.js"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/app.js"></script>
+<script src="assets/affiliate.js"></script>
+<script>
+const CAT_DESCS = {
+  all: 'All articles, ranked by importance score.',
+  cross: 'Where crypto meets AI — the intersection that matters most.',
+  crypto: 'Markets, protocols, and on-chain developments.',
+  ai: 'Models, research, and AI industry moves.',
+  regulation: 'Policy, legal, and government actions affecting crypto.',
+  onchain: 'On-chain data anomalies and protocol metrics.'
+};
+
+async function init() {
+  await CL.auth.initAuth();
+
+  const params = new URLSearchParams(location.search);
+  const cat = params.get('cat') || 'all';
+  const tag = params.get('tag');
+
+  if (tag) {
+    document.getElementById('cat-title').textContent = `#${tag}`;
+    document.getElementById('cat-desc').textContent = `Articles tagged with #${tag}`;
+    currentTag = tag;
+  } else {
+    currentCategory = cat;
+    document.getElementById('cat-title').textContent =
+      { all:'All Articles', cross:'Crypto × AI', crypto:'Crypto', ai:'AI', regulation:'Regulation', onchain:'On-chain' }[cat] || cat;
+    document.getElementById('cat-desc').textContent = CAT_DESCS[cat] || '';
+    document.querySelector(`.nav-filter[data-cat="${cat}"]`)?.classList.add('active');
+  }
+
+  await loadFeed(true);
+}
+
+async function handleModalLogin() {
+  const email = document.getElementById('modal-email').value.trim();
+  const msg = document.getElementById('modal-msg');
+  const error = await CL.auth.sendMagicLink(email);
+  if (error) { msg.className='msg msg-error'; msg.textContent=error.message; }
+  else { msg.className='msg msg-success'; msg.textContent='Check your email!'; }
+}
+
+document.addEventListener('authChanged', () => loadFeed(true));
+init();
+</script>
+</body>
+</html>
