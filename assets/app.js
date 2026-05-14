@@ -72,7 +72,7 @@ function renderCard(article, isTop) {
          rel="noopener" onclick="event.stopPropagation()">
         ${article.title}
       </a>
-      <p class="card-summary">${article.summary || ''}</p>
+      <p class="card-summary">${article.summary || ''}${article.summary_zh ? `<span class="summary-zh">${article.summary_zh}</span>` : ''}</p>
       ${tags ? `<div class="card-tags">${tags}</div>` : ''}
       ${renderEditorNote(article)}
     </div>`;
@@ -175,6 +175,41 @@ async function handleSubscribe(email) {
   return { error };
 }
 
+async function loadKolPulse() {
+  const sb = window.CL.supabase;
+  const since = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
+
+  const { data } = await sb
+    .from('kol_tweets_public')
+    .select('*')
+    .gte('published_at', since)
+    .gte('importance_score', 6)
+    .order('importance_score', { ascending: false })
+    .order('published_at', { ascending: false })
+    .limit(6);
+
+  const container = document.getElementById('kol-grid');
+  if (!container) return;
+
+  if (!data?.length) {
+    container.innerHTML = '<p class="kol-empty">No high-signal KOL activity in the past 48h.</p>';
+    return;
+  }
+
+  container.innerHTML = data.map(t => `
+    <div class="kol-card">
+      <div class="kol-meta">
+        <span class="kol-handle">@${t.handle}</span>
+        <span class="score-badge ${scoreClass(t.importance_score)}">●${t.importance_score}</span>
+        <span class="kol-time">${timeAgo(t.published_at)}</span>
+      </div>
+      <p class="kol-content">${t.content || ''}</p>
+      ${t.summary_zh ? `<p class="kol-summary-zh">${t.summary_zh}</p>` : ''}
+      <a class="kol-link" href="${t.tweet_url}" target="_blank" rel="noopener">View on X ↗</a>
+    </div>`
+  ).join('');
+}
+
 window.setCategory = setCategory;
 window.filterByTag = filterByTag;
 window.openArticle = openArticle;
@@ -182,3 +217,4 @@ window.handleSubscribe = handleSubscribe;
 window.loadFeed = loadFeed;
 window.loadTodaysTop = loadTodaysTop;
 window.loadSidebarTags = loadSidebarTags;
+window.loadKolPulse = loadKolPulse;

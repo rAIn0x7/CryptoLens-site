@@ -67,7 +67,8 @@ Scoring dimensions:
 
 Return exactly this JSON:
 {
-  "summary": "<100-word English summary of the key insight>",
+  "summary": "<one punchy sentence in English, ≤25 words, capturing the key insight>",
+  "summary_zh": "<一句话中文，25字以内，概括核心要点>",
   "editor_note": "<150-word opinion on why this matters for crypto/AI investors>",
   "importance_score": <integer 1-10>,
   "tags": ["<tag1>", "<tag2>", "<tag3>"],
@@ -84,6 +85,7 @@ async function processWithGemini(article) {
     return {
       importance_score: Math.min(10, Math.max(1, parseInt(parsed.importance_score) || 5)),
       summary: (parsed.summary || '').slice(0, 500),
+      summary_zh: (parsed.summary_zh || '').slice(0, 200),
       editor_note: (parsed.editor_note || '').slice(0, 800),
       tags: Array.isArray(parsed.tags) ? parsed.tags.slice(0, 6) : [],
       category: ['crypto','ai','cross','regulation','onchain'].includes(parsed.category) ? parsed.category : article.source_category,
@@ -103,6 +105,7 @@ async function insertArticle(article, geminiResult) {
     content:          article.content,
     published_at:     article.published_at,
     summary:          geminiResult.summary,
+    summary_zh:       geminiResult.summary_zh,
     editor_note:      geminiResult.editor_note,
     importance_score: geminiResult.importance_score,
     tags:             geminiResult.tags,
