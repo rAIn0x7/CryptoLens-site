@@ -3,6 +3,7 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
 let isProUser = false;
+let _authListenerRegistered = false;
 
 async function initAuth() {
   const { data: { session } } = await _supabase.auth.getSession();
@@ -11,6 +12,9 @@ async function initAuth() {
     await _loadProStatus();
   }
   _updateNavUI();
+
+  if (_authListenerRegistered) return;
+  _authListenerRegistered = true;
 
   _supabase.auth.onAuthStateChange(async (_event, session) => {
     currentUser = session?.user ?? null;
