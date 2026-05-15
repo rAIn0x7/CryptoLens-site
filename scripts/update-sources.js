@@ -24,11 +24,23 @@ async function main() {
     { name: 'Milk Road',        url: 'https://milkroad.com',        feed_url: 'https://milkroad.com/feed',                category: 'crypto' },
   ];
 
-  const { error: insertErr } = await supabase
+  // Check which sources already exist
+  const { data: existing } = await supabase
     .from('sources')
-    .upsert(newSources, { onConflict: 'name', ignoreDuplicates: true });
-  if (insertErr) console.error('Add sources:', insertErr.message);
-  else console.log(`✓ ${newSources.length} new sources added`);
+    .select('name');
+  const existingNames = new Set((existing || []).map(s => s.name));
+
+  let added = 0;
+  for (const src of newSources) {
+    if (existingNames.has(src.name)) {
+      console.log(`  skip (exists): ${src.name}`);
+      continue;
+    }
+    const { error } = await supabase.from('sources').insert(src);
+    if (error) console.error(`  insert failed: ${src.name}: ${error.message}`);
+    else { console.log(`  added: ${src.name}`); added++; }
+  }
+  console.log(`✓ ${added} new sources added`);
 
   const { data: active } = await supabase
     .from('sources')
