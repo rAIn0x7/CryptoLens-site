@@ -108,6 +108,23 @@ async function main() {
   ]);
   console.log('Cookies set OK');
 
+  // ── diagnostic: test one account ──────────────────────────
+  console.log('\n[DIAG] Testing profile lookup for @elonmusk...');
+  try {
+    const profile = await scraper.getProfile('elonmusk');
+    console.log('[DIAG] profile.userId:', profile?.userId);
+    console.log('[DIAG] profile.tweetsCount:', profile?.tweetsCount);
+  } catch (e) { console.log('[DIAG] getProfile error:', e.message); }
+
+  console.log('[DIAG] Testing getUserTweets for @elonmusk...');
+  try {
+    const res = await scraper.getUserTweets('44196397', 3);  // Musk's user ID
+    const items = [];
+    for await (const t of res) { items.push(t?.text?.slice(0, 60)); if (items.length >= 3) break; }
+    console.log('[DIAG] getUserTweets result:', JSON.stringify(items));
+  } catch (e) { console.log('[DIAG] getUserTweets error:', e.message); }
+  // ────────────────────────────────────────────────────────────
+
   let totalInserted = 0;
 
   for (const kol of KOLS) {
