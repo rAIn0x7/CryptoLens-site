@@ -9,6 +9,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
     "@supabase/supabase-js": "^2.39.0",
+    "agent-twitter-client": "^0.0.18",
     "resend": "^4.0.0",
     "rss-parser": "^3.13.0"
   }
