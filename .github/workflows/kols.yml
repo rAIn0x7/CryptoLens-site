@@ -24,3 +24,6 @@ jobs:
           SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           GEMINI_API_KEY:            ${{ secrets.GEMINI_API_KEY }}
+          TWITTER_USERNAME:          ${{ secrets.TWITTER_USERNAME }}
+          TWITTER_PASSWORD:          ${{ secrets.TWITTER_PASSWORD }}
+          TWITTER_EMAIL:             ${{ secrets.TWITTER_EMAIL }}
