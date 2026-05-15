@@ -175,39 +175,39 @@ async function handleSubscribe(email) {
   return { error };
 }
 
-async function loadKolPulse() {
+
+async function loadMarketPulse() {
   const sb = window.CL.supabase;
-  const since = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
-
   const { data } = await sb
-    .from('kol_tweets_public')
+    .from('market_pulse_public')
     .select('*')
-    .gte('published_at', since)
-    .gte('importance_score', 6)
-    .order('importance_score', { ascending: false })
-    .order('published_at', { ascending: false })
-    .limit(6);
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-  const container = document.getElementById('kol-grid');
+  const container = document.getElementById('pulse-card');
   if (!container) return;
 
-  if (!data?.length) {
-    container.innerHTML = '<p class="kol-empty">No high-signal KOL activity in the past 48h.</p>';
+  if (!data) {
+    container.innerHTML = '<p class="pulse-empty">Market pulse will appear after the next fetch cycle.</p>';
     return;
   }
 
-  container.innerHTML = data.map(t => `
-    <div class="kol-card">
-      <div class="kol-meta">
-        <span class="kol-handle">@${t.handle}</span>
-        <span class="score-badge ${scoreClass(t.importance_score)}">●${t.importance_score}</span>
-        <span class="kol-time">${timeAgo(t.published_at)}</span>
-      </div>
-      <p class="kol-content">${t.content || ''}</p>
-      ${t.summary_zh ? `<p class="kol-summary-zh">${t.summary_zh}</p>` : ''}
-      <a class="kol-link" href="${t.tweet_url}" target="_blank" rel="noopener">View on X ↗</a>
-    </div>`
-  ).join('');
+  const sentClass = { bullish: 'pulse-bullish', bearish: 'pulse-bearish', neutral: 'pulse-neutral', mixed: 'pulse-mixed' }[data.sentiment] || 'pulse-neutral';
+  const sentLabel = (data.sentiment || 'neutral').toUpperCase();
+  const sign = data.sentiment_score > 0 ? '+' : '';
+  const themes = (data.key_themes || []).map(t => `<span class="tag">#${t}</span>`).join('');
+
+  container.className = `pulse-card ${sentClass}`;
+  container.innerHTML = `
+    <div class="pulse-header">
+      <span class="pulse-label">MARKET PULSE</span>
+      <span class="pulse-badge">${sentLabel} ${sign}${data.sentiment_score}</span>
+      <span class="pulse-time">Based on ${data.article_count || '?'} signals · ${timeAgo(data.created_at)}</span>
+    </div>
+    <p class="pulse-summary-en">${data.summary_en || ''}</p>
+    <p class="pulse-summary-zh">${data.summary_zh || ''}</p>
+    ${themes ? `<div class="pulse-themes">${themes}</div>` : ''}`;
 }
 
 window.setCategory = setCategory;
@@ -217,4 +217,4 @@ window.handleSubscribe = handleSubscribe;
 window.loadFeed = loadFeed;
 window.loadTodaysTop = loadTodaysTop;
 window.loadSidebarTags = loadSidebarTags;
-window.loadKolPulse = loadKolPulse;
+window.loadMarketPulse = loadMarketPulse;

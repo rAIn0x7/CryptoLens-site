@@ -48,6 +48,15 @@
   <p>Filtered signal from 11 sources · Updated every 2 hours · Scored by Gemini AI</p>
 </div>
 
+<!-- MARKET PULSE -->
+<div class="container" style="padding-top:0">
+  <div class="pulse-section">
+    <div class="pulse-card" id="pulse-card">
+      <div class="card skeleton" style="height:140px"></div>
+    </div>
+  </div>
+</div>
+
 <div class="container">
   <!-- TODAY'S TOP -->
   <div class="top-section">
@@ -56,16 +65,6 @@
       <div class="card skeleton" style="height:160px"></div>
       <div class="card skeleton" style="height:160px"></div>
       <div class="card skeleton" style="height:160px"></div>
-    </div>
-  </div>
-
-  <!-- KOL PULSE -->
-  <div class="kol-section">
-    <div class="section-label">KOL Pulse — High-Signal Tweets</div>
-    <div class="kol-grid" id="kol-grid">
-      <div class="card skeleton" style="height:120px"></div>
-      <div class="card skeleton" style="height:120px"></div>
-      <div class="card skeleton" style="height:120px"></div>
     </div>
   </div>
 
@@ -121,7 +120,7 @@
 <script>
 async function init() {
   await CL.auth.initAuth();
-  await Promise.all([loadTodaysTop(), loadKolPulse(), loadSidebarTags()]);
+  await Promise.all([loadTodaysTop(), loadMarketPulse(), loadSidebarTags()]);
   await loadFeed(true);
 }
 

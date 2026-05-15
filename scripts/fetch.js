@@ -122,6 +122,63 @@ async function updateSourceTimestamp(sourceId) {
   await supabase.from('sources').update({ last_fetched_at: new Date().toISOString() }).eq('id', sourceId);
 }
 
+async function generateMarketPulse() {
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { data: articles } = await supabase
+    .from('articles')
+    .select('title, summary, importance_score, category')
+    .gte('published_at', since)
+    .gte('importance_score', 7)
+    .order('importance_score', { ascending: false })
+    .limit(20);
+
+  if (!articles?.length) {
+    console.log('Market Pulse: no recent high-signal articles, skipping');
+    return;
+  }
+
+  console.log(`\nGenerating Market Pulse from ${articles.length} articles...`);
+
+  const articleList = articles
+    .map(a => `[${a.importance_score}][${a.category}] ${a.title} — ${a.summary || ''}`)
+    .join('\n');
+
+  const prompt = `You are a senior crypto market analyst. Synthesize these ${articles.length} high-signal stories from the past 24 hours into a market intelligence brief.
+
+Stories (format: [score][category] title — summary):
+${articleList}
+
+Return ONLY valid JSON — no markdown, no explanation:
+{
+  "summary_en": "<3-4 sentences in English: dominant trend, key developments, key risk, directional bias>",
+  "summary_zh": "<3-4句中文：主要趋势、关键进展、核心风险、方向判断>",
+  "sentiment": "<bullish|bearish|neutral|mixed>",
+  "sentiment_score": <integer -10 to +10, negative=bearish, positive=bullish>,
+  "key_themes": ["<theme1>", "<theme2>", "<theme3>", "<theme4>", "<theme5>"]
+}`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim().replace(/^```json\n?/, '').replace(/\n?```$/, '');
+    const parsed = JSON.parse(text);
+
+    const validSentiments = ['bullish', 'bearish', 'neutral', 'mixed'];
+    await supabase.from('market_pulse').insert({
+      summary_en:      (parsed.summary_en || '').slice(0, 1000),
+      summary_zh:      (parsed.summary_zh || '').slice(0, 800),
+      sentiment:       validSentiments.includes(parsed.sentiment) ? parsed.sentiment : 'neutral',
+      sentiment_score: Math.min(10, Math.max(-10, parseInt(parsed.sentiment_score) || 0)),
+      key_themes:      Array.isArray(parsed.key_themes) ? parsed.key_themes.slice(0, 6) : [],
+      article_count:   articles.length,
+    });
+
+    const sign = parsed.sentiment_score > 0 ? '+' : '';
+    console.log(`Market Pulse generated: ${parsed.sentiment} (${sign}${parsed.sentiment_score})`);
+  } catch (err) {
+    console.error('Market Pulse generation failed:', err.message);
+  }
+}
+
 async function main() {
   console.log('CryptoLens fetch started:', new Date().toISOString());
 
@@ -160,6 +217,7 @@ async function main() {
   }
 
   console.log(`\nDone. Fetched:${totalFetched} New:${totalNew} Processed:${totalProcessed} Inserted:${totalInserted}`);
+  await generateMarketPulse();
 }
 
 main().catch(err => { console.error('Fatal:', err); process.exit(1); });
