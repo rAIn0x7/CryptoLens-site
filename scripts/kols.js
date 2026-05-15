@@ -95,6 +95,17 @@ async function main() {
   console.log(`Existing tweet IDs in DB: ${existingIds.size}`);
 
   const scraper = new Scraper();
+
+  const twitterUser = process.env.TWITTER_USERNAME;
+  const twitterPass = process.env.TWITTER_PASSWORD;
+  if (!twitterUser || !twitterPass) {
+    console.error('TWITTER_USERNAME / TWITTER_PASSWORD not set. Aborting.');
+    process.exit(1);
+  }
+  console.log(`Logging in as @${twitterUser}...`);
+  await scraper.login(twitterUser, twitterPass, process.env.TWITTER_EMAIL || undefined);
+  console.log('Login OK');
+
   let totalInserted = 0;
 
   for (const kol of KOLS) {
