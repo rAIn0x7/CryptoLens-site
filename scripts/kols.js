@@ -106,13 +106,7 @@ async function main() {
     `auth_token=${authToken}; Domain=.twitter.com; Path=/; Secure`,
     `ct0=${ct0}; Domain=.twitter.com; Path=/; Secure`,
   ]);
-  console.log('Cookies set, verifying login...');
-  const loggedIn = await scraper.isLoggedIn();
-  if (!loggedIn) {
-    console.error('Cookie auth failed — token may have expired, refresh auth_token + ct0.');
-    process.exit(1);
-  }
-  console.log('Login OK (cookie auth)');
+  console.log('Cookies set OK');
 
   let totalInserted = 0;
 
