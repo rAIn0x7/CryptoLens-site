@@ -96,15 +96,23 @@ async function main() {
 
   const scraper = new Scraper();
 
-  const twitterUser = process.env.TWITTER_USERNAME;
-  const twitterPass = process.env.TWITTER_PASSWORD;
-  if (!twitterUser || !twitterPass) {
-    console.error('TWITTER_USERNAME / TWITTER_PASSWORD not set. Aborting.');
+  const authToken = process.env.TWITTER_AUTH_TOKEN;
+  const ct0       = process.env.TWITTER_CT0;
+  if (!authToken || !ct0) {
+    console.error('TWITTER_AUTH_TOKEN / TWITTER_CT0 not set. Aborting.');
     process.exit(1);
   }
-  console.log(`Logging in as @${twitterUser}...`);
-  await scraper.login(twitterUser, twitterPass, process.env.TWITTER_EMAIL || undefined);
-  console.log('Login OK');
+  await scraper.setCookies([
+    `auth_token=${authToken}; Domain=.twitter.com; Path=/; Secure`,
+    `ct0=${ct0}; Domain=.twitter.com; Path=/; Secure`,
+  ]);
+  console.log('Cookies set, verifying login...');
+  const loggedIn = await scraper.isLoggedIn();
+  if (!loggedIn) {
+    console.error('Cookie auth failed — token may have expired, refresh auth_token + ct0.');
+    process.exit(1);
+  }
+  console.log('Login OK (cookie auth)');
 
   let totalInserted = 0;
 
