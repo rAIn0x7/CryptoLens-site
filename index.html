@@ -49,6 +49,7 @@
     <div class="pulse-hero-inner" id="pulse-card">
       <div class="card skeleton" style="height:180px"></div>
     </div>
+    <div class="btc-ticker-bar" id="btc-ticker"></div>
     <div class="pulse-trend-wrap" id="pulse-trend"></div>
   </div>
 </div>
@@ -116,7 +117,7 @@
 <script>
 async function init() {
   await CL.auth.initAuth();
-  await Promise.all([loadTodaysTop(), loadMarketPulse(), loadPulseTrend(), loadSidebarTags()]);
+  await Promise.all([loadTodaysTop(), loadMarketPulse(), loadBtcTicker(), loadPulseTrend(), loadSidebarTags()]);
   await loadFeed(true);
 }
 

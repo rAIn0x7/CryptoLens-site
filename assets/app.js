@@ -220,53 +220,103 @@ window.openArticle = openArticle;
 window.handleSubscribe = handleSubscribe;
 window.loadFeed = loadFeed;
 window.loadTodaysTop = loadTodaysTop;
-function renderDailyBars(days) {
-  const W = 600, H = 170;
-  const PL = 8, PR = 8, PT = 18, PB = 32;
+function fmtPrice(p) {
+  return p >= 1000 ? '$' + (p / 1000).toFixed(1) + 'k' : '$' + Math.round(p);
+}
+
+function renderDailyBars(days, btcByDay) {
+  const W = 600, H = 180;
+  const PL = 8, PR = 46, PT = 18, PB = 32;
   const plotW = W - PL - PR;
   const plotH = H - PT - PB;
   const n = days.length;
   const midY = PT + plotH / 2;
   const COLOR = { bullish:'#00c896', bearish:'#ff4757', neutral:'#ffd32a', mixed:'#a29bfe' };
 
+  // Sentiment scale
   const maxAbs = Math.max(...days.map(d => Math.abs(d.score)), 2);
-  const scale  = (plotH / 2 - 4) / maxAbs;
+  const sentScale = (plotH / 2 - 6) / maxAbs;
+  const barW = Math.min(plotW / n * 0.55, 34);
+  const step = plotW / n;
 
-  const barW = Math.min(plotW / n * 0.6, 36);
-  const step  = plotW / n;
+  // BTC price scale
+  const btcPrices = days.map(d => btcByDay?.[d.day]).filter(p => p != null);
+  const hasBtc = btcPrices.length >= 2;
+  let btcMin, btcMax, btcLine = '', btcLabels = '';
+  if (hasBtc) {
+    btcMin = Math.min(...btcPrices);
+    btcMax = Math.max(...btcPrices);
+    const pad = (btcMax - btcMin) * 0.18 || btcMin * 0.01;
+    btcMin -= pad; btcMax += pad;
+    const btcScale = plotH / (btcMax - btcMin);
+    const toY = p => PT + plotH - (p - btcMin) * btcScale;
+
+    const pts = days.map((d, i) => {
+      const p = btcByDay[d.day];
+      if (p == null) return null;
+      return { x: PL + (i + 0.5) * step, y: toY(p) };
+    }).filter(Boolean);
+
+    if (pts.length >= 2) {
+      const path = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+      const dots = pts.map(p => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="2.8" fill="#f7931a" stroke="rgba(0,0,0,0.5)" stroke-width="0.8"/>`).join('');
+      btcLine = `<path d="${path}" fill="none" stroke="#f7931a" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" opacity="0.9"/>${dots}`;
+      const ax = W - PR + 5;
+      btcLabels = `<text x="${ax}" y="${(toY(btcMax)+8).toFixed(1)}" font-size="8" fill="#f7931a" font-family="JetBrains Mono,monospace" opacity="0.75">${fmtPrice(btcMax)}</text>
+<text x="${ax}" y="${(toY(btcMin)-2).toFixed(1)}" font-size="8" fill="#f7931a" font-family="JetBrains Mono,monospace" opacity="0.75">${fmtPrice(btcMin)}</text>
+<line x1="${W-PR}" y1="${PT}" x2="${W-PR}" y2="${PT+plotH}" stroke="rgba(247,147,26,0.15)" stroke-width="1"/>`;
+    }
+  }
 
   const bars = days.map((d, i) => {
-    const cx   = PL + (i + 0.5) * step;
-    const bh   = Math.max(Math.abs(d.score) * scale, 3);
-    const by   = d.score >= 0 ? midY - bh : midY;
-    const c    = COLOR[d.sentiment] || '#a29bfe';
+    const cx = PL + (i + 0.5) * step;
+    const bh = Math.max(Math.abs(d.score) * sentScale, 3);
+    const by = d.score >= 0 ? midY - bh : midY;
+    const c  = COLOR[d.sentiment] || '#a29bfe';
     const sign = d.score > 0 ? '+' : '';
-    const ly   = d.score >= 0 ? by - 6 : by + bh + 14;
-    const dl   = new Date(d.day + 'T12:00:00Z').toLocaleDateString('en', { month: 'short', day: 'numeric' });
-    return `<rect x="${(cx-barW/2).toFixed(1)}" y="${by.toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" fill="${c}" rx="2" opacity="0.85"/>
+    const ly = d.score >= 0 ? by - 6 : by + bh + 14;
+    const dl = new Date(d.day + 'T12:00:00Z').toLocaleDateString('en', { month: 'short', day: 'numeric' });
+    return `<rect x="${(cx-barW/2).toFixed(1)}" y="${by.toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" fill="${c}" rx="2" opacity="0.7"/>
 <text x="${cx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" font-size="9.5" fill="${c}" font-family="JetBrains Mono,monospace" font-weight="700">${sign}${d.score}</text>
 <text x="${cx.toFixed(1)}" y="${H-5}" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.28)" font-family="JetBrains Mono,monospace">${dl}</text>`;
   }).join('');
 
-  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:160px;display:block">
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:165px;display:block">
   <line x1="${PL}" y1="${midY}" x2="${W-PR}" y2="${midY}" stroke="rgba(255,255,255,0.1)" stroke-width="1" stroke-dasharray="4,3"/>
   ${bars}
+  ${btcLine}
+  ${btcLabels}
 </svg>`;
+}
+
+async function loadBtcTicker() {
+  const el = document.getElementById('btc-ticker');
+  if (!el) return;
+  try {
+    const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true');
+    const d = await r.json();
+    const price = d?.bitcoin?.usd;
+    const change = d?.bitcoin?.usd_24h_change;
+    if (price == null) return;
+    const up = change >= 0;
+    el.innerHTML = `<span class="btc-symbol">₿</span><span class="btc-price">$${Math.round(price).toLocaleString('en')}</span><span class="btc-change ${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${up ? '+' : ''}${change.toFixed(2)}%</span><span class="btc-label">24h</span>`;
+  } catch { el.innerHTML = ''; }
 }
 
 async function loadPulseTrend() {
   const container = document.getElementById('pulse-trend');
   if (!container) return;
   const sb = window.CL.supabase;
-  // fetch enough for 14 days (12 readings/day × 14 = 168)
-  const { data, error } = await sb
-    .from('market_pulse_public')
-    .select('sentiment_score, sentiment, created_at')
-    .limit(200);
+
+  const [{ data, error }, btcResp] = await Promise.all([
+    sb.from('market_pulse_public').select('sentiment_score, sentiment, created_at').limit(200),
+    fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=14&interval=daily').then(r => r.json()).catch(() => null)
+  ]);
+
   if (error) { console.warn('pulse trend:', error.message); return; }
   if (!data || data.length < 2) { container.innerHTML = ''; return; }
 
-  // aggregate by calendar day
+  // aggregate sentiment by day
   const byDay = {};
   data.forEach(r => {
     const day = r.created_at.slice(0, 10);
@@ -274,7 +324,6 @@ async function loadPulseTrend() {
     byDay[day].scores.push(r.sentiment_score);
     byDay[day].sentiments.push(r.sentiment);
   });
-
   const aggregated = Object.keys(byDay).sort().map(day => {
     const scores = byDay[day].scores;
     const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
@@ -283,11 +332,20 @@ async function loadPulseTrend() {
     const sentiment = Object.entries(sentCount).sort((a, b) => b[1] - a[1])[0][0];
     return { day, score: avg, sentiment };
   });
-
   if (aggregated.length < 2) { container.innerHTML = ''; return; }
-  container.innerHTML = renderDailyBars(aggregated);
+
+  // BTC daily closing prices keyed by YYYY-MM-DD
+  const btcByDay = {};
+  if (btcResp?.prices) {
+    btcResp.prices.forEach(([ts, price]) => {
+      btcByDay[new Date(ts).toISOString().slice(0, 10)] = price;
+    });
+  }
+
+  container.innerHTML = renderDailyBars(aggregated, btcByDay);
 }
 
 window.loadSidebarTags = loadSidebarTags;
 window.loadMarketPulse = loadMarketPulse;
 window.loadPulseTrend  = loadPulseTrend;
+window.loadBtcTicker   = loadBtcTicker;
