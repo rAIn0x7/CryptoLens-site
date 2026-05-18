@@ -214,12 +214,96 @@ async function loadMarketPulse() {
     ${themes ? `<div class="pulse-hero-themes">${themes}</div>` : ''}`;
 }
 
+/* ── BINANCE WEBSOCKET ── */
+let _btcWsRetries = 0;
+let _btcWsFallbackTimer = null;
+
+function initBtcWebSocket() {
+  const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker');
+
+  ws.onopen = () => {
+    setLiveStatus(true);
+    _btcWsRetries = 0;
+    if (_btcWsFallbackTimer) { clearInterval(_btcWsFallbackTimer); _btcWsFallbackTimer = null; }
+  };
+
+  ws.onmessage = (e) => {
+    const d = JSON.parse(e.data);
+    updateBtcPrice({
+      price:  parseFloat(d.c),
+      change: parseFloat(d.P),
+      high:   parseFloat(d.h),
+      low:    parseFloat(d.l),
+      volume: parseFloat(d.v),
+    });
+  };
+
+  ws.onclose = ws.onerror = () => {
+    setLiveStatus(false);
+    if (_btcWsRetries < 10) {
+      _btcWsRetries++;
+      setTimeout(initBtcWebSocket, 3000);
+    } else {
+      _startBtcFallbackPoll();
+    }
+  };
+}
+
+function setLiveStatus(live) {
+  const ring  = document.getElementById('live-ring');
+  const label = document.getElementById('live-status');
+  if (ring)  ring.style.background = live ? '#00c896' : 'rgba(255,255,255,0.2)';
+  if (label) label.textContent = live ? 'BTC/USD · BINANCE · LIVE' : 'BTC/USD · BINANCE · ~10s';
+}
+
+function updateBtcPrice({ price, change, high, low, volume }) {
+  const priceStr = '$' + Math.round(price).toLocaleString('en');
+  const up  = change >= 0;
+  const chgStr = (up ? '▲ +' : '▼ ') + Math.abs(change).toFixed(2) + '%';
+
+  ['btc-price', 'sb-btc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = priceStr;
+    el.style.textShadow = '0 0 10px rgba(247,147,26,0.5)';
+    setTimeout(() => { el.style.textShadow = ''; }, 350);
+  });
+
+  const chgEl = document.getElementById('btc-chg');
+  if (chgEl) { chgEl.textContent = chgStr; chgEl.style.color = up ? '#00c896' : '#ff4757'; }
+
+  const rangeEl = document.getElementById('btc-range');
+  if (rangeEl && high && low) {
+    rangeEl.textContent =
+      `24h 低: $${Math.round(low).toLocaleString('en')} · 高: $${Math.round(high).toLocaleString('en')} · Vol: ${(volume / 1000).toFixed(1)}k BTC`;
+  }
+}
+
+async function _startBtcFallbackPoll() {
+  async function poll() {
+    try {
+      const r = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
+      const d = await r.json();
+      updateBtcPrice({
+        price:  parseFloat(d.lastPrice),
+        change: parseFloat(d.priceChangePercent),
+        high:   parseFloat(d.highPrice),
+        low:    parseFloat(d.lowPrice),
+        volume: parseFloat(d.volume),
+      });
+    } catch {}
+  }
+  poll();
+  _btcWsFallbackTimer = setInterval(poll, 10000);
+}
+
 window.setCategory = setCategory;
 window.filterByTag = filterByTag;
 window.openArticle = openArticle;
 window.handleSubscribe = handleSubscribe;
 window.loadFeed = loadFeed;
 window.loadTodaysTop = loadTodaysTop;
+window.initBtcWebSocket = initBtcWebSocket;
 function fmtPrice(p) {
   return p >= 1000 ? '$' + (p / 1000).toFixed(1) + 'k' : '$' + Math.round(p);
 }
