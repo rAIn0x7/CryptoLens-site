@@ -220,5 +220,70 @@ window.openArticle = openArticle;
 window.handleSubscribe = handleSubscribe;
 window.loadFeed = loadFeed;
 window.loadTodaysTop = loadTodaysTop;
+function formatTrendDate(date) {
+  return date.toLocaleDateString('en', { month: 'short', day: 'numeric' });
+}
+
+function renderTrendChart(readings) {
+  const W = 600, H = 100;
+  const PL = 4, PR = 4, PT = 20, PB = 16;
+  const plotW = W - PL - PR;
+  const plotH = H - PT - PB;
+  const midY = PT + plotH / 2;
+  const scaleY = plotH / 22;
+  const n = readings.length;
+  const COLOR = { bullish:'#00c896', bearish:'#ff4757', neutral:'#ffd32a', mixed:'#a29bfe' };
+
+  const pts = readings.map((r, i) => ({
+    x: PL + (n === 1 ? plotW / 2 : (i / (n - 1)) * plotW),
+    y: midY - r.sentiment_score * scaleY,
+    score: r.sentiment_score,
+    sentiment: r.sentiment,
+    date: new Date(r.created_at)
+  }));
+
+  const linePath = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const areaPath = `${linePath} L${pts[n-1].x.toFixed(1)},${midY} L${pts[0].x.toFixed(1)},${midY} Z`;
+
+  const dots = pts.map(p => {
+    const c = COLOR[p.sentiment] || '#a29bfe';
+    const sign = p.score > 0 ? '+' : '';
+    const ly = p.y < midY ? p.y - 7 : p.y + 14;
+    return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.2" fill="${c}" stroke="rgba(0,0,0,0.4)" stroke-width="0.8"/>
+<text x="${p.x.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" font-size="8.5" fill="${c}" font-family="JetBrains Mono,monospace" font-weight="700">${sign}${p.score}</text>`;
+  }).join('');
+
+  const startLabel = formatTrendDate(pts[0].date);
+  const endLabel   = formatTrendDate(pts[n-1].date);
+
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:90px;display:block">
+  <defs>
+    <clipPath id="tc-pos"><rect x="0" y="0" width="${W}" height="${midY}"/></clipPath>
+    <clipPath id="tc-neg"><rect x="0" y="${midY}" width="${W}" height="${H - midY}"/></clipPath>
+  </defs>
+  <line x1="${PL}" y1="${midY}" x2="${W-PR}" y2="${midY}" stroke="rgba(255,255,255,0.1)" stroke-width="1" stroke-dasharray="4,3"/>
+  <path d="${areaPath}" fill="rgba(0,200,150,0.13)" clip-path="url(#tc-pos)"/>
+  <path d="${areaPath}" fill="rgba(255,71,87,0.13)" clip-path="url(#tc-neg)"/>
+  <path d="${linePath}" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>
+  ${dots}
+  <text x="${PL+2}" y="${H-2}" font-size="8" fill="rgba(255,255,255,0.25)" font-family="JetBrains Mono,monospace">${startLabel}</text>
+  <text x="${W-PR-2}" y="${H-2}" font-size="8" fill="rgba(255,255,255,0.25)" font-family="JetBrains Mono,monospace" text-anchor="end">${endLabel}</text>
+</svg>`;
+}
+
+async function loadPulseTrend() {
+  const container = document.getElementById('pulse-trend');
+  if (!container) return;
+  const sb = window.CL.supabase;
+  const { data } = await sb
+    .from('market_pulse_public')
+    .select('sentiment_score, sentiment, created_at')
+    .order('created_at', { ascending: true })
+    .limit(21);
+  if (!data || data.length < 2) { container.innerHTML = ''; return; }
+  container.innerHTML = renderTrendChart(data);
+}
+
 window.loadSidebarTags = loadSidebarTags;
 window.loadMarketPulse = loadMarketPulse;
+window.loadPulseTrend  = loadPulseTrend;
