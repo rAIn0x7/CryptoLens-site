@@ -526,19 +526,20 @@ async function loadFearGreed() {
 
     const val   = parseInt(today.value, 10);
     if (!Number.isFinite(val)) { el.style.display = 'none'; return; }
-    const label = today.value_classification || '';
+    const ZH_LABEL = { 'Extreme Fear':'极度恐慌', 'Fear':'恐慌', 'Neutral':'中立', 'Greed':'贪婪', 'Extreme Greed':'极度贪婪' };
+    const label = ZH_LABEL[today.value_classification] || today.value_classification || '';
     const color = val >= 75 ? '#00c896' : val >= 55 ? '#ffd32a' : val >= 30 ? '#f7931a' : '#ff4757';
 
     el.innerHTML = `
-      <div class="btc-meta" style="margin-bottom:0.4rem">CRYPTO FEAR &amp; GREED</div>
+      <div class="btc-meta" style="margin-bottom:0.4rem">恐贪指数</div>
       <div style="display:flex;align-items:baseline;gap:0.5rem;margin-bottom:0.25rem">
         <span style="font-family:var(--font-mono);font-size:1.3rem;font-weight:700;line-height:1;color:${color}">${val}</span>
-        <span style="font-size:0.65rem;color:${color};font-family:var(--font-mono);letter-spacing:0.06em">${escapeHtml(label.toUpperCase())}</span>
+        <span style="font-size:0.65rem;color:${color};font-family:var(--font-mono);letter-spacing:0.06em">${escapeHtml(label)}</span>
       </div>
       <div class="fg-bar-wrap">
         <div class="fg-bar" style="width:${val}%;background:linear-gradient(to right,#ff4757,#ffd32a 50%,#00c896)"></div>
       </div>
-      <div class="fg-labels"><span>Fear</span><span>Neutral</span><span>Greed</span></div>
+      <div class="fg-labels"><span>恐慌</span><span>中立</span><span>贪婪</span></div>
       <div class="fg-history">昨日: ${escapeHtml(yest.value)} · 上周: ${escapeHtml(week.value)}</div>`;
     el.style.display = '';
   } catch { el.style.display = 'none'; }
