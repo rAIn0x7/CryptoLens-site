@@ -644,3 +644,36 @@ async function loadPriceSnapshot() {
 }
 
 window.loadPriceSnapshot = loadPriceSnapshot;
+
+/* ── FEAR & GREED SIDEBAR ── */
+async function loadFearGreed() {
+  const el = document.getElementById('fear-greed-block');
+  if (!el) return;
+  try {
+    const r = await fetch('https://api.alternative.me/fng/?limit=8');
+    const json = await r.json();
+    const entries = json?.data;
+    if (!Array.isArray(entries) || !entries.length) { el.style.display = 'none'; return; }
+
+    const today = entries[0];
+    const yest  = entries[1] || today;
+    const week  = entries[7] || entries[entries.length - 1] || today;
+
+    const val   = parseInt(today.value, 10);
+    const label = today.value_classification || '';
+    const color = val >= 75 ? '#00c896' : val >= 55 ? '#ffd32a' : val >= 30 ? '#f7931a' : '#ff4757';
+
+    el.innerHTML = `
+      <div class="sidebar-title">Crypto Fear &amp; Greed</div>
+      <div style="font-family:var(--font-mono);font-size:1.3rem;font-weight:700;line-height:1;color:${color};margin-bottom:0.2rem">${val}</div>
+      <div style="font-size:0.65rem;color:${color};font-family:var(--font-mono);margin-bottom:0.6rem;letter-spacing:0.06em">${escapeHtml(label.toUpperCase())}</div>
+      <div class="fg-bar-wrap">
+        <div class="fg-bar" style="width:${val}%;background:linear-gradient(to right,#ff4757,#ffd32a 50%,#00c896)"></div>
+      </div>
+      <div class="fg-labels"><span>Fear</span><span>Neutral</span><span>Greed</span></div>
+      <div class="fg-history">昨日: ${escapeHtml(yest.value)} · 上周: ${escapeHtml(week.value)}</div>`;
+    el.style.display = '';
+  } catch { el.style.display = 'none'; }
+}
+
+window.loadFearGreed = loadFearGreed;
