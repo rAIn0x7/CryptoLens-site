@@ -36,7 +36,7 @@ Three coordinated changes to CryptoLens:
 - Large mood word + score from `market_pulse_public` (Supabase)
 - AI summary (EN + ZH, EN shown in hero)
 - Theme tags
-- 14-day mini bar chart (existing `loadPulseTrend` data, rendered smaller)
+- 14-day mini bar chart rendered inside `#hero-hist-bars` — same Supabase data as current `loadPulseTrend()`, but rendered inline in the hero instead of in the standalone `#pulse-trend` section (which is removed)
 
 ### Right panel (new)
 - BTC price, 24h change — from Binance WebSocket
@@ -134,7 +134,7 @@ Add 2–3 more tags from recent pulse themes (currently capped at ~5, expand to 
 |------|---------|
 | `assets/app.js` | Add `initBtcWebSocket()`, `loadHourlyChart()`, `loadPriceSnapshot()`, `loadFearGreed()`. Refactor `loadBtcTicker()` → replaced by WS. Refactor `renderDailyBars()` → `renderHourlyChart()`. Update `loadPulseTrend()` to use smaller bar render for hero left panel. Update `loadSidebarTags()` to accept more tags. Update `init()` to call new functions. |
 | `assets/style.css` | Sidebar width `280px → 340px`. Hero grid `grid-template-columns: 1fr 1fr`. New styles: `.btc-panel`, `.price-row`, `.pr-spark`, `.fg-bar-wrap`, `.fg-bar`, `.live-ring`, `.sent-band`. Minor glow gradient update. |
-| `index.html` | Update hero inner HTML structure (add `.btc-panel` div). Update sidebar HTML (add Price Snapshot and Fear & Greed blocks). |
+| `index.html` | Update hero inner HTML structure (add `.btc-panel` div, add `#hero-hist-bars` inside hero left panel). **Remove** the standalone `#pulse-trend` div and `#btc-ticker` div that currently sit below the hero — their content moves into the hero panels. Update sidebar HTML (add Price Snapshot and Fear & Greed blocks). Remove `loadBtcTicker` and `loadPulseTrend` from `init()` call; add `initBtcWebSocket`, `loadHourlyChart`, `loadPriceSnapshot`, `loadFearGreed`. |
 
 ---
 
