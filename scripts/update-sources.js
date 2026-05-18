@@ -6,28 +6,39 @@ const supabase = createClient(
 );
 
 async function main() {
-  // Disable low-signal Reddit sources
+  // Disable dead / low-signal sources
+  const toDisable = [
+    'Reddit Crypto', 'Reddit AI',       // low signal
+    'Bankless',                          // 403
+    'Bitcoin Magazine',                  // 403
+    'Milk Road',                         // XML parse error
+    'a16z crypto',                       // 404
+    'Paradigm',                          // 404
+    'Import AI',                         // 403
+    'The Batch',                         // 404
+  ];
   const { error: disableErr } = await supabase
     .from('sources')
     .update({ is_active: false })
-    .in('name', ['Reddit Crypto', 'Reddit AI']);
-  if (disableErr) console.error('Disable Reddit:', disableErr.message);
-  else console.log('✓ Reddit sources disabled');
+    .in('name', toDisable);
+  if (disableErr) console.error('Disable error:', disableErr.message);
+  else console.log(`✓ Disabled ${toDisable.length} dead/low-signal sources`);
 
-  // Add high-signal sources
+  // Replacement sources (all verified 200 OK)
   const newSources = [
-    { name: 'CoinTelegraph',    url: 'https://cointelegraph.com',   feed_url: 'https://cointelegraph.com/rss',             category: 'crypto' },
-    { name: 'Bitcoin Magazine', url: 'https://bitcoinmagazine.com', feed_url: 'https://bitcoinmagazine.com/.rss/full/',    category: 'crypto' },
-    { name: 'The Defiant',      url: 'https://thedefiant.io',       feed_url: 'https://thedefiant.io/feed',               category: 'crypto' },
-    { name: 'Bankless',         url: 'https://bankless.com',        feed_url: 'https://bankless.substack.com/feed',        category: 'crypto' },
-    { name: 'CryptoSlate',      url: 'https://cryptoslate.com',     feed_url: 'https://cryptoslate.com/feed/',            category: 'crypto' },
-    { name: 'Milk Road',        url: 'https://milkroad.com',        feed_url: 'https://milkroad.com/feed',                category: 'crypto' },
+    // Crypto replacements
+    { name: 'Unchained',      url: 'https://unchainedcrypto.com',  feed_url: 'https://unchainedcrypto.com/feed/',                              category: 'crypto' },
+    { name: 'BeInCrypto',     url: 'https://beincrypto.com',       feed_url: 'https://beincrypto.com/feed/',                                   category: 'crypto' },
+    { name: 'DL News',        url: 'https://www.dlnews.com',       feed_url: 'https://www.dlnews.com/rss/',                                    category: 'crypto' },
+    { name: 'Protos',         url: 'https://protos.com',           feed_url: 'https://protos.com/feed/',                                       category: 'crypto' },
+    { name: 'CryptoNews',     url: 'https://cryptonews.com',       feed_url: 'https://cryptonews.com/news/feed/',                              category: 'crypto' },
+    // AI replacements
+    { name: 'VentureBeat AI', url: 'https://venturebeat.com',      feed_url: 'https://venturebeat.com/category/ai/feed/',                      category: 'ai'     },
+    { name: 'TechCrunch AI',  url: 'https://techcrunch.com',       feed_url: 'https://techcrunch.com/category/artificial-intelligence/feed/',  category: 'ai'     },
   ];
 
-  // Check which sources already exist
-  const { data: existing } = await supabase
-    .from('sources')
-    .select('name');
+  // Check which already exist
+  const { data: existing } = await supabase.from('sources').select('name');
   const existingNames = new Set((existing || []).map(s => s.name));
 
   let added = 0;
@@ -42,12 +53,12 @@ async function main() {
   }
   console.log(`✓ ${added} new sources added`);
 
-  const { data: active } = await supabase
+  const { data: all } = await supabase
     .from('sources')
     .select('name, is_active')
     .order('name');
-  console.log('\nCurrent sources:');
-  active?.forEach(s => console.log(`  [${s.is_active ? '✓' : '✗'}] ${s.name}`));
+  console.log('\nAll sources:');
+  all?.forEach(s => console.log(`  [${s.is_active ? '✓' : '✗'}] ${s.name}`));
 }
 
 main().catch(e => { console.error('Fatal:', e); process.exit(1); });
