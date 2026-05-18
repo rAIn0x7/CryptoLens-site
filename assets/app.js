@@ -275,13 +275,14 @@ async function loadPulseTrend() {
   const container = document.getElementById('pulse-trend');
   if (!container) return;
   const sb = window.CL.supabase;
-  const { data } = await sb
+  // view orders DESC; fetch latest 21 then reverse for chronological display
+  const { data, error } = await sb
     .from('market_pulse_public')
     .select('sentiment_score, sentiment, created_at')
-    .order('created_at', { ascending: true })
     .limit(21);
+  if (error) { console.warn('pulse trend:', error.message); return; }
   if (!data || data.length < 2) { container.innerHTML = ''; return; }
-  container.innerHTML = renderTrendChart(data);
+  container.innerHTML = renderTrendChart([...data].reverse());
 }
 
 window.loadSidebarTags = loadSidebarTags;
