@@ -575,3 +575,72 @@ async function loadHourlyChart() {
 }
 
 window.loadHourlyChart = loadHourlyChart;
+
+/* ── PRICE SNAPSHOT SIDEBAR ── */
+function _sparkPoints(ticker) {
+  const open  = parseFloat(ticker.openPrice);
+  const close = parseFloat(ticker.lastPrice);
+  const hi    = parseFloat(ticker.highPrice);
+  const lo    = parseFloat(ticker.lowPrice);
+  const range = hi - lo || 1;
+  const toY   = p => ((hi - p) / range * 16 + 2).toFixed(1);
+  const up    = close >= open;
+  const pts = [
+    { x: 0,  p: open },
+    { x: 10, p: up ? lo : hi },
+    { x: 22, p: (open + close) / 2 },
+    { x: 36, p: up ? hi : lo },
+    { x: 46, p: close * 0.99 + open * 0.01 },
+    { x: 52, p: close },
+  ];
+  return pts.map(pt => `${pt.x},${toY(pt.p)}`).join(' ');
+}
+
+async function loadPriceSnapshot() {
+  const el = document.getElementById('price-snapshot-block');
+  if (!el) return;
+  try {
+    const symbols = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT', 'BNBUSDT'];
+    const r = await fetch(
+      `https://api.binance.com/api/v3/ticker/24hr?symbols=${encodeURIComponent(JSON.stringify(symbols))}`
+    );
+    const data = await r.json();
+    if (!Array.isArray(data)) return;
+
+    const META = {
+      BTCUSDT: { sym: 'BTC', name: 'Bitcoin',  id: 'sb-btc' },
+      ETHUSDT: { sym: 'ETH', name: 'Ethereum',  id: '' },
+      SOLUSDT: { sym: 'SOL', name: 'Solana',    id: '' },
+      BNBUSDT: { sym: 'BNB', name: 'BNB Chain', id: '' },
+    };
+
+    const rows = data.map(d => {
+      const m      = META[d.symbol] || { sym: d.symbol.replace('USDT',''), name: d.symbol, id: '' };
+      const price  = parseFloat(d.lastPrice);
+      const pctChg = parseFloat(d.priceChangePercent);
+      const up     = pctChg >= 0;
+      const priceStr = price >= 1000
+        ? '$' + Math.round(price).toLocaleString('en')
+        : '$' + price.toFixed(2);
+      const chgStr = (up ? '+' : '') + pctChg.toFixed(2) + '%';
+      const color  = up ? '#00c896' : '#ff4757';
+      const idAttr = m.id ? `id="${m.id}"` : '';
+      return `<div class="price-row">
+        <span class="pr-sym">${m.sym}</span>
+        <span class="pr-name">${m.name}</span>
+        <span class="pr-price" ${idAttr}>${priceStr}</span>
+        <span class="pr-chg" style="color:${color}">${chgStr}</span>
+        <svg class="pr-spark" viewBox="0 0 52 20" preserveAspectRatio="none">
+          <polyline points="${_sparkPoints(d)}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+      </div>`;
+    }).join('');
+
+    el.innerHTML = `<div class="sidebar-title">Price Snapshot <span class="live-badge-sm">LIVE</span></div>${rows}`;
+    el.style.display = '';
+  } catch { el.style.display = 'none'; }
+
+  setTimeout(loadPriceSnapshot, 30000);
+}
+
+window.loadPriceSnapshot = loadPriceSnapshot;
