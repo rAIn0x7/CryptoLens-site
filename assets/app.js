@@ -306,43 +306,51 @@ async function loadBtcTicker() {
 async function loadPulseTrend() {
   const container = document.getElementById('pulse-trend');
   if (!container) return;
-  const sb = window.CL.supabase;
+  try {
+    const sb = window.CL.supabase;
+    const { data, error } = await sb
+      .from('market_pulse_public')
+      .select('sentiment_score, sentiment, created_at')
+      .limit(200);
 
-  const [{ data, error }, btcResp] = await Promise.all([
-    sb.from('market_pulse_public').select('sentiment_score, sentiment, created_at').limit(200),
-    fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=14&interval=daily').then(r => r.json()).catch(() => null)
-  ]);
+    if (error) { console.warn('pulse trend query:', error.message); return; }
+    if (!data || data.length < 1) { console.warn('pulse trend: no data'); return; }
 
-  if (error) { console.warn('pulse trend:', error.message); return; }
-  if (!data || data.length < 2) { container.innerHTML = ''; return; }
-
-  // aggregate sentiment by day
-  const byDay = {};
-  data.forEach(r => {
-    const day = r.created_at.slice(0, 10);
-    if (!byDay[day]) byDay[day] = { scores: [], sentiments: [] };
-    byDay[day].scores.push(r.sentiment_score);
-    byDay[day].sentiments.push(r.sentiment);
-  });
-  const aggregated = Object.keys(byDay).sort().map(day => {
-    const scores = byDay[day].scores;
-    const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
-    const sentCount = {};
-    byDay[day].sentiments.forEach(s => { sentCount[s] = (sentCount[s] || 0) + 1; });
-    const sentiment = Object.entries(sentCount).sort((a, b) => b[1] - a[1])[0][0];
-    return { day, score: avg, sentiment };
-  });
-  if (aggregated.length < 2) { container.innerHTML = ''; return; }
-
-  // BTC daily closing prices keyed by YYYY-MM-DD
-  const btcByDay = {};
-  if (btcResp?.prices) {
-    btcResp.prices.forEach(([ts, price]) => {
-      btcByDay[new Date(ts).toISOString().slice(0, 10)] = price;
+    // aggregate sentiment by day
+    const byDay = {};
+    data.forEach(r => {
+      const day = (r.created_at || '').slice(0, 10);
+      if (!day) return;
+      if (!byDay[day]) byDay[day] = { scores: [], sentiments: [] };
+      byDay[day].scores.push(Number(r.sentiment_score) || 0);
+      byDay[day].sentiments.push(r.sentiment || 'neutral');
     });
-  }
+    const aggregated = Object.keys(byDay).sort().map(day => {
+      const scores = byDay[day].scores;
+      const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+      const sentCount = {};
+      byDay[day].sentiments.forEach(s => { sentCount[s] = (sentCount[s] || 0) + 1; });
+      const sentiment = Object.entries(sentCount).sort((a, b) => b[1] - a[1])[0][0];
+      return { day, score: avg, sentiment };
+    });
+    if (aggregated.length < 1) { console.warn('pulse trend: empty after aggregation'); return; }
 
-  container.innerHTML = renderDailyBars(aggregated, btcByDay);
+    // try BTC prices — render chart regardless of whether this succeeds
+    let btcByDay = {};
+    try {
+      const r = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=14&interval=daily');
+      const btcResp = await r.json();
+      if (Array.isArray(btcResp?.prices)) {
+        btcResp.prices.forEach(([ts, price]) => {
+          btcByDay[new Date(ts).toISOString().slice(0, 10)] = price;
+        });
+      }
+    } catch (e) { console.warn('BTC price fetch failed:', e.message); }
+
+    container.innerHTML = renderDailyBars(aggregated, btcByDay);
+  } catch (e) {
+    console.error('loadPulseTrend error:', e);
+  }
 }
 
 window.loadSidebarTags = loadSidebarTags;
