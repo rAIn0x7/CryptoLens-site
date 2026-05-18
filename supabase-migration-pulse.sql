@@ -29,6 +29,15 @@ CREATE TABLE IF NOT EXISTS market_pulse (
 
 ALTER TABLE market_pulse ENABLE ROW LEVEL SECURITY;
 
+-- allow anon/authenticated to read (required for view to return data)
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies WHERE tablename='market_pulse' AND policyname='public read'
+  ) THEN
+    CREATE POLICY "public read" ON market_pulse FOR SELECT USING (true);
+  END IF;
+END $$;
+
 -- ── 4. market_pulse_public view ───────────────────────────────
 DROP VIEW IF EXISTS market_pulse_public;
 CREATE VIEW market_pulse_public AS
