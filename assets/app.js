@@ -181,37 +181,69 @@ async function loadMarketPulse() {
   const { data } = await sb
     .from('market_pulse_public')
     .select('*')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(200);
 
   const container = document.getElementById('pulse-card');
   const hero = document.getElementById('pulse-hero');
   if (!container) return;
 
-  if (!data) {
+  if (!data?.length) {
     container.innerHTML = '<p class="pulse-empty">Market pulse will appear after the next fetch cycle.</p>';
     return;
   }
 
-  const sentKey = ['bullish','bearish','neutral','mixed'].includes(data.sentiment) ? data.sentiment : 'neutral';
-  const sign = data.sentiment_score > 0 ? '+' : '';
-  const themes = (data.key_themes || []).map(t => `<span class="tag">#${t}</span>`).join('');
-
+  const latest  = data[0];
+  const sentKey = ['bullish','bearish','neutral','mixed'].includes(latest.sentiment) ? latest.sentiment : 'neutral';
+  const sign    = latest.sentiment_score > 0 ? '+' : '';
+  const themes  = (latest.key_themes || []).map(t => `<span class="tag">#${t}</span>`).join('');
   if (hero) hero.className = `pulse-hero pulse-${sentKey}`;
+
+  const byDay = {};
+  data.forEach(r => {
+    const day = (r.created_at || '').slice(0, 10);
+    if (!day) return;
+    if (!byDay[day]) byDay[day] = { scores: [], sentiments: [] };
+    byDay[day].scores.push(Number(r.sentiment_score) || 0);
+    byDay[day].sentiments.push(r.sentiment || 'neutral');
+  });
+  const days = Object.keys(byDay).sort().slice(-14).map(day => {
+    const scores = byDay[day].scores;
+    const avg    = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+    const cnt    = {};
+    byDay[day].sentiments.forEach(s => { cnt[s] = (cnt[s] || 0) + 1; });
+    const sentiment = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0][0];
+    return { day, score: avg, sentiment };
+  });
+
+  const COLOR    = { bullish:'#00c896', bearish:'#ff4757', neutral:'#ffd32a', mixed:'#a29bfe' };
+  const maxScore = Math.max(...days.map(d => Math.abs(d.score)), 1);
+  const bars = days.map(d => {
+    const c  = COLOR[d.sentiment] || '#ffd32a';
+    const h  = Math.max(Math.round((Math.abs(d.score) / maxScore) * 100), 4);
+    const op = Math.min(0.4 + Math.abs(d.score) / 100 * 0.6, 1.0).toFixed(2);
+    return `<div class="hist-bar" style="height:${h}%;background:${c};opacity:${op}"></div>`;
+  }).join('');
+  const firstDay = days[0]?.day
+    ? new Date(days[0].day + 'T12:00:00Z').toLocaleDateString('en', { month: 'short', day: 'numeric' })
+    : '';
 
   container.innerHTML = `
     <div class="pulse-hero-meta">
       <span class="pulse-label">MARKET PULSE</span>
-      <span class="pulse-time">Based on ${data.article_count || '?'} signals · ${timeAgo(data.created_at)}</span>
+      <span class="pulse-time">Based on ${latest.article_count || '?'} signals · ${timeAgo(latest.created_at)}</span>
     </div>
     <div class="pulse-hero-sentiment">
       <span class="pulse-hero-mood">${sentKey.toUpperCase()}</span>
-      <span class="pulse-hero-score">${sign}${data.sentiment_score}</span>
+      <span class="pulse-hero-score">${sign}${latest.sentiment_score}</span>
     </div>
-    <p class="pulse-hero-en">${data.summary_en || ''}</p>
-    <p class="pulse-hero-zh">${data.summary_zh || ''}</p>
-    ${themes ? `<div class="pulse-hero-themes">${themes}</div>` : ''}`;
+    <p class="pulse-hero-en">${latest.summary_en || ''}</p>
+    ${themes ? `<div class="pulse-hero-themes">${themes}</div>` : ''}
+    ${days.length > 0 ? `
+    <div class="hero-hist-bars">
+      <div class="hist-label">14-DAY HISTORY</div>
+      <div class="hist-bars">${bars}</div>
+      <div class="hist-dates"><span>${firstDay}</span><span>Today</span></div>
+    </div>` : ''}`;
 }
 
 /* ── BINANCE WEBSOCKET ── */
