@@ -186,6 +186,7 @@ async function loadMarketPulse() {
     .maybeSingle();
 
   const container = document.getElementById('pulse-card');
+  const hero = document.getElementById('pulse-hero');
   if (!container) return;
 
   if (!data) {
@@ -193,21 +194,24 @@ async function loadMarketPulse() {
     return;
   }
 
-  const sentClass = { bullish: 'pulse-bullish', bearish: 'pulse-bearish', neutral: 'pulse-neutral', mixed: 'pulse-mixed' }[data.sentiment] || 'pulse-neutral';
-  const sentLabel = (data.sentiment || 'neutral').toUpperCase();
+  const sentKey = ['bullish','bearish','neutral','mixed'].includes(data.sentiment) ? data.sentiment : 'neutral';
   const sign = data.sentiment_score > 0 ? '+' : '';
   const themes = (data.key_themes || []).map(t => `<span class="tag">#${t}</span>`).join('');
 
-  container.className = `pulse-card ${sentClass}`;
+  if (hero) hero.className = `pulse-hero pulse-${sentKey}`;
+
   container.innerHTML = `
-    <div class="pulse-header">
+    <div class="pulse-hero-meta">
       <span class="pulse-label">MARKET PULSE</span>
-      <span class="pulse-badge">${sentLabel} ${sign}${data.sentiment_score}</span>
       <span class="pulse-time">Based on ${data.article_count || '?'} signals · ${timeAgo(data.created_at)}</span>
     </div>
-    <p class="pulse-summary-en">${data.summary_en || ''}</p>
-    <p class="pulse-summary-zh">${data.summary_zh || ''}</p>
-    ${themes ? `<div class="pulse-themes">${themes}</div>` : ''}`;
+    <div class="pulse-hero-sentiment">
+      <span class="pulse-hero-mood">${sentKey.toUpperCase()}</span>
+      <span class="pulse-hero-score">${sign}${data.sentiment_score}</span>
+    </div>
+    <p class="pulse-hero-en">${data.summary_en || ''}</p>
+    <p class="pulse-hero-zh">${data.summary_zh || ''}</p>
+    ${themes ? `<div class="pulse-hero-themes">${themes}</div>` : ''}`;
 }
 
 window.setCategory = setCategory;
