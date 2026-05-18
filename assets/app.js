@@ -484,7 +484,7 @@ function renderHourlyChart(closes) {
     </linearGradient>
   </defs>
   <line x1="${PL}" y1="${(PT + plotH * 0.25).toFixed(1)}" x2="${W-PR}" y2="${(PT + plotH * 0.25).toFixed(1)}" stroke="rgba(255,255,255,0.04)" stroke-dasharray="4,3"/>
-  <line x1="${PL}" y1="${(PT + plotH * 0.65).toFixed(1)}" x2="${W-PR}" y2="${(PT + plotH * 0.65).toFixed(1)}" stroke="rgba(255,255,255,0.04)" stroke-dasharray="4,3"/>
+  <line x1="${PL}" y1="${(PT + plotH * 0.60).toFixed(1)}" x2="${W-PR}" y2="${(PT + plotH * 0.60).toFixed(1)}" stroke="rgba(255,255,255,0.04)" stroke-dasharray="4,3"/>
   <line x1="${W-PR}" y1="${PT}" x2="${W-PR}" y2="${(PT+plotH).toFixed(1)}" stroke="rgba(247,147,26,0.12)" stroke-width="1"/>
   <path d="${fillD}" fill="url(#hg)"/>
   <path d="${pathD}" fill="none" stroke="#f7931a" stroke-width="1.8" stroke-linejoin="round"/>
