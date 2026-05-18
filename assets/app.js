@@ -443,3 +443,98 @@ window.loadSidebarTags = loadSidebarTags;
 window.loadMarketPulse = loadMarketPulse;
 window.loadPulseTrend  = loadPulseTrend;
 window.loadBtcTicker   = loadBtcTicker;
+
+/* ── HOURLY CHART ── */
+function fmtK(p) {
+  return p >= 1000 ? '$' + (p / 1000).toFixed(1) + 'k' : '$' + Math.round(p);
+}
+
+function renderHourlyChart(closes) {
+  const W = 380, H = 88;
+  const PL = 4, PR = 44, PT = 12, PB = 8;
+  const plotW = W - PL - PR;
+  const plotH = H - PT - PB;
+
+  const min = Math.min(...closes);
+  const max = Math.max(...closes);
+  const pad = (max - min) * 0.15 || min * 0.005;
+  const lo = min - pad;
+  const hi = max + pad;
+  const scaleY = plotH / (hi - lo);
+  const toY = p => PT + plotH - (p - lo) * scaleY;
+
+  const n = closes.length;
+  const step = plotW / Math.max(n - 1, 1);
+  const pts = closes.map((p, i) => ({ x: PL + i * step, y: toY(p) }));
+
+  const pathD = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const fillD = pathD + ` L${pts[pts.length-1].x.toFixed(1)},${(PT+plotH).toFixed(1)} L${PL},${(PT+plotH).toFixed(1)} Z`;
+
+  const lx = pts[pts.length-1].x.toFixed(1);
+  const ly = pts[pts.length-1].y.toFixed(1);
+  const hiY = toY(max).toFixed(1);
+  const loY = toY(min).toFixed(1);
+  const ax  = W - PR + 5;
+
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:88px;display:block">
+  <defs>
+    <linearGradient id="hg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f7931a" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#f7931a" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <line x1="${PL}" y1="${(PT + plotH * 0.25).toFixed(1)}" x2="${W-PR}" y2="${(PT + plotH * 0.25).toFixed(1)}" stroke="rgba(255,255,255,0.04)" stroke-dasharray="4,3"/>
+  <line x1="${PL}" y1="${(PT + plotH * 0.65).toFixed(1)}" x2="${W-PR}" y2="${(PT + plotH * 0.65).toFixed(1)}" stroke="rgba(255,255,255,0.04)" stroke-dasharray="4,3"/>
+  <line x1="${W-PR}" y1="${PT}" x2="${W-PR}" y2="${(PT+plotH).toFixed(1)}" stroke="rgba(247,147,26,0.12)" stroke-width="1"/>
+  <path d="${fillD}" fill="url(#hg)"/>
+  <path d="${pathD}" fill="none" stroke="#f7931a" stroke-width="1.8" stroke-linejoin="round"/>
+  <circle cx="${lx}" cy="${ly}" r="3.5" fill="#f7931a" stroke="rgba(0,0,0,0.5)" stroke-width="1.5"/>
+  <circle cx="${lx}" cy="${ly}" r="7" fill="none" stroke="#f7931a" stroke-width="1" opacity="0.3"/>
+  <text x="${ax}" y="${(parseFloat(hiY)+8).toFixed(1)}" font-size="7" fill="rgba(247,147,26,0.65)" font-family="JetBrains Mono,monospace">${fmtK(max)}</text>
+  <text x="${ax}" y="${(parseFloat(loY)-2).toFixed(1)}" font-size="7" fill="rgba(247,147,26,0.45)" font-family="JetBrains Mono,monospace">${fmtK(min)}</text>
+</svg>`;
+}
+
+function renderSentBand(pulses) {
+  const COLOR = { bullish:'#00c896', bearish:'#ff4757', neutral:'#ffd32a', mixed:'#a29bfe' };
+  return '<div class="sent-band">' +
+    pulses.map(p => {
+      const c  = COLOR[p.sentiment] || '#ffd32a';
+      const op = Math.min(0.4 + Math.abs(p.sentiment_score || 0) / 100 * 0.6, 1.0).toFixed(2);
+      return `<div class="sb-seg" style="background:${c};opacity:${op}"></div>`;
+    }).join('') +
+  '</div>';
+}
+
+async function loadHourlyChart() {
+  const el = document.getElementById('btc-chart');
+  if (!el) return;
+  try {
+    const r = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=24');
+    const klines = await r.json();
+    if (!Array.isArray(klines) || klines.length < 2) return;
+    const closes = klines.map(k => parseFloat(k[4]));
+
+    const sb = window.CL.supabase;
+    const { data: pulses } = await sb
+      .from('market_pulse_public')
+      .select('sentiment_score, sentiment')
+      .limit(12);
+
+    const band = pulses && pulses.length > 0 ? renderSentBand([...pulses].reverse()) : '';
+
+    el.innerHTML =
+      renderHourlyChart(closes) +
+      band +
+      `<div class="chart-foot">
+        <span>24h ago</span>
+        <span style="color:rgba(255,255,255,0.1)">▓ sentiment</span>
+        <span>now</span>
+      </div>`;
+  } catch (e) {
+    console.warn('loadHourlyChart error:', e.message);
+  }
+  setTimeout(loadHourlyChart, 30 * 60 * 1000);
+}
+
+window.loadHourlyChart = loadHourlyChart;
