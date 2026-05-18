@@ -25,6 +25,10 @@ function timeAgo(dateStr) {
   return `${Math.floor(h / 24)}d ago`;
 }
 
+function escapeHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
 function renderEditorNote(article) {
   if (article.editor_note) {
     return `
@@ -181,6 +185,7 @@ async function loadMarketPulse() {
   const { data } = await sb
     .from('market_pulse_public')
     .select('*')
+    .order('created_at', { ascending: false })
     .limit(200);
 
   const container = document.getElementById('pulse-card');
@@ -195,7 +200,7 @@ async function loadMarketPulse() {
   const latest  = data[0];
   const sentKey = ['bullish','bearish','neutral','mixed'].includes(latest.sentiment) ? latest.sentiment : 'neutral';
   const sign    = latest.sentiment_score > 0 ? '+' : '';
-  const themes  = (latest.key_themes || []).map(t => `<span class="tag">#${t}</span>`).join('');
+  const themes  = (latest.key_themes || []).map(t => `<span class="tag">#${escapeHtml(t)}</span>`).join('');
   if (hero) hero.className = `pulse-hero pulse-${sentKey}`;
 
   const byDay = {};
@@ -230,13 +235,13 @@ async function loadMarketPulse() {
   container.innerHTML = `
     <div class="pulse-hero-meta">
       <span class="pulse-label">MARKET PULSE</span>
-      <span class="pulse-time">Based on ${latest.article_count || '?'} signals · ${timeAgo(latest.created_at)}</span>
+      <span class="pulse-time">Based on ${escapeHtml(latest.article_count || '?')} signals · ${timeAgo(latest.created_at)}</span>
     </div>
     <div class="pulse-hero-sentiment">
       <span class="pulse-hero-mood">${sentKey.toUpperCase()}</span>
-      <span class="pulse-hero-score">${sign}${latest.sentiment_score}</span>
+      <span class="pulse-hero-score">${sign}${escapeHtml(latest.sentiment_score)}</span>
     </div>
-    <p class="pulse-hero-en">${latest.summary_en || ''}</p>
+    <p class="pulse-hero-en">${escapeHtml(latest.summary_en)}</p>
     ${themes ? `<div class="pulse-hero-themes">${themes}</div>` : ''}
     ${days.length > 0 ? `
     <div class="hero-hist-bars">
