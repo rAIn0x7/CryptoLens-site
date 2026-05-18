@@ -660,6 +660,7 @@ async function loadFearGreed() {
     const week  = entries[7] || entries[entries.length - 1] || today;
 
     const val   = parseInt(today.value, 10);
+    if (!Number.isFinite(val)) { el.style.display = 'none'; return; }
     const label = today.value_classification || '';
     const color = val >= 75 ? '#00c896' : val >= 55 ? '#ffd32a' : val >= 30 ? '#f7931a' : '#ff4757';
 
