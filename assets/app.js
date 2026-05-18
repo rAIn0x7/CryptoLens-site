@@ -239,6 +239,7 @@ function initBtcWebSocket() {
   };
 
   ws.onclose = ws.onerror = () => {
+    ws.onclose = ws.onerror = null;
     setLiveStatus(false);
     if (_btcWsRetries < 10) {
       _btcWsRetries++;
@@ -279,7 +280,8 @@ function updateBtcPrice({ price, change, high, low, volume }) {
   }
 }
 
-async function _startBtcFallbackPoll() {
+function _startBtcFallbackPoll() {
+  if (_btcWsFallbackTimer) return;
   async function poll() {
     try {
       const r = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
@@ -291,7 +293,7 @@ async function _startBtcFallbackPoll() {
         low:    parseFloat(d.lowPrice),
         volume: parseFloat(d.volume),
       });
-    } catch {}
+    } catch (e) { console.warn('[BTC poll]', e.message); }
   }
   poll();
   _btcWsFallbackTimer = setInterval(poll, 10000);
