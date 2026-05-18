@@ -220,68 +220,37 @@ window.openArticle = openArticle;
 window.handleSubscribe = handleSubscribe;
 window.loadFeed = loadFeed;
 window.loadTodaysTop = loadTodaysTop;
-function formatTrendDate(date) {
-  return date.toLocaleDateString('en', { month: 'short', day: 'numeric' });
-}
-
-function renderTrendChart(readings) {
-  const W = 600, H = 150;
-  const PL = 6, PR = 6, PT = 24, PB = 20;
+function renderDailyBars(days) {
+  const W = 600, H = 170;
+  const PL = 8, PR = 8, PT = 18, PB = 32;
   const plotW = W - PL - PR;
   const plotH = H - PT - PB;
-  const n = readings.length;
+  const n = days.length;
+  const midY = PT + plotH / 2;
   const COLOR = { bullish:'#00c896', bearish:'#ff4757', neutral:'#ffd32a', mixed:'#a29bfe' };
 
-  // adaptive scale: expand data range by 2 units each side, minimum span of 6
-  const scores = readings.map(r => r.sentiment_score);
-  const rawMin = Math.min(...scores), rawMax = Math.max(...scores);
-  const span = Math.max(rawMax - rawMin, 6);
-  const pad = Math.ceil(span * 0.25);
-  const yMin = rawMin - pad, yMax = rawMax + pad;
-  const yRange = yMax - yMin;
+  const maxAbs = Math.max(...days.map(d => Math.abs(d.score)), 2);
+  const scale  = (plotH / 2 - 4) / maxAbs;
 
-  const toY = s => PT + plotH * (1 - (s - yMin) / yRange);
-  const zeroY = toY(0);
+  const barW = Math.min(plotW / n * 0.6, 36);
+  const step  = plotW / n;
 
-  const pts = readings.map((r, i) => ({
-    x: PL + (n === 1 ? plotW / 2 : (i / (n - 1)) * plotW),
-    y: toY(r.sentiment_score),
-    score: r.sentiment_score,
-    sentiment: r.sentiment,
-    date: new Date(r.created_at)
-  }));
-
-  const linePath = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-  const areaPath = `${linePath} L${pts[n-1].x.toFixed(1)},${zeroY.toFixed(1)} L${pts[0].x.toFixed(1)},${zeroY.toFixed(1)} Z`;
-
-  const dots = pts.map(p => {
-    const c = COLOR[p.sentiment] || '#a29bfe';
-    const sign = p.score > 0 ? '+' : '';
-    const ly = p.y < zeroY ? p.y - 8 : p.y + 15;
-    return `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="${c}" stroke="rgba(0,0,0,0.5)" stroke-width="1"/>
-<text x="${p.x.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" font-size="9" fill="${c}" font-family="JetBrains Mono,monospace" font-weight="700">${sign}${p.score}</text>`;
+  const bars = days.map((d, i) => {
+    const cx   = PL + (i + 0.5) * step;
+    const bh   = Math.max(Math.abs(d.score) * scale, 3);
+    const by   = d.score >= 0 ? midY - bh : midY;
+    const c    = COLOR[d.sentiment] || '#a29bfe';
+    const sign = d.score > 0 ? '+' : '';
+    const ly   = d.score >= 0 ? by - 6 : by + bh + 14;
+    const dl   = new Date(d.day + 'T12:00:00Z').toLocaleDateString('en', { month: 'short', day: 'numeric' });
+    return `<rect x="${(cx-barW/2).toFixed(1)}" y="${by.toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" fill="${c}" rx="2" opacity="0.85"/>
+<text x="${cx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" font-size="9.5" fill="${c}" font-family="JetBrains Mono,monospace" font-weight="700">${sign}${d.score}</text>
+<text x="${cx.toFixed(1)}" y="${H-5}" text-anchor="middle" font-size="8.5" fill="rgba(255,255,255,0.28)" font-family="JetBrains Mono,monospace">${dl}</text>`;
   }).join('');
 
-  const startLabel = formatTrendDate(pts[0].date);
-  const endLabel   = formatTrendDate(pts[n-1].date);
-
-  // zero line only if zero is within visible range
-  const zeroLine = (zeroY > PT && zeroY < PT + plotH)
-    ? `<line x1="${PL}" y1="${zeroY.toFixed(1)}" x2="${W-PR}" y2="${zeroY.toFixed(1)}" stroke="rgba(255,255,255,0.12)" stroke-width="1" stroke-dasharray="4,3"/>`
-    : '';
-
-  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:130px;display:block">
-  <defs>
-    <clipPath id="tc-pos"><rect x="0" y="0" width="${W}" height="${zeroY.toFixed(1)}"/></clipPath>
-    <clipPath id="tc-neg"><rect x="0" y="${zeroY.toFixed(1)}" width="${W}" height="${H}"/></clipPath>
-  </defs>
-  ${zeroLine}
-  <path d="${areaPath}" fill="rgba(0,200,150,0.15)" clip-path="url(#tc-pos)"/>
-  <path d="${areaPath}" fill="rgba(255,71,87,0.15)" clip-path="url(#tc-neg)"/>
-  <path d="${linePath}" fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-  ${dots}
-  <text x="${PL+2}" y="${H-4}" font-size="9" fill="rgba(255,255,255,0.3)" font-family="JetBrains Mono,monospace">${startLabel}</text>
-  <text x="${W-PR-2}" y="${H-4}" font-size="9" fill="rgba(255,255,255,0.3)" font-family="JetBrains Mono,monospace" text-anchor="end">${endLabel}</text>
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:160px;display:block">
+  <line x1="${PL}" y1="${midY}" x2="${W-PR}" y2="${midY}" stroke="rgba(255,255,255,0.1)" stroke-width="1" stroke-dasharray="4,3"/>
+  ${bars}
 </svg>`;
 }
 
@@ -289,14 +258,34 @@ async function loadPulseTrend() {
   const container = document.getElementById('pulse-trend');
   if (!container) return;
   const sb = window.CL.supabase;
-  // view orders DESC; fetch latest 21 then reverse for chronological display
+  // fetch enough for 14 days (12 readings/day × 14 = 168)
   const { data, error } = await sb
     .from('market_pulse_public')
     .select('sentiment_score, sentiment, created_at')
-    .limit(21);
+    .limit(200);
   if (error) { console.warn('pulse trend:', error.message); return; }
   if (!data || data.length < 2) { container.innerHTML = ''; return; }
-  container.innerHTML = renderTrendChart([...data].reverse());
+
+  // aggregate by calendar day
+  const byDay = {};
+  data.forEach(r => {
+    const day = r.created_at.slice(0, 10);
+    if (!byDay[day]) byDay[day] = { scores: [], sentiments: [] };
+    byDay[day].scores.push(r.sentiment_score);
+    byDay[day].sentiments.push(r.sentiment);
+  });
+
+  const aggregated = Object.keys(byDay).sort().map(day => {
+    const scores = byDay[day].scores;
+    const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+    const sentCount = {};
+    byDay[day].sentiments.forEach(s => { sentCount[s] = (sentCount[s] || 0) + 1; });
+    const sentiment = Object.entries(sentCount).sort((a, b) => b[1] - a[1])[0][0];
+    return { day, score: avg, sentiment };
+  });
+
+  if (aggregated.length < 2) { container.innerHTML = ''; return; }
+  container.innerHTML = renderDailyBars(aggregated);
 }
 
 window.loadSidebarTags = loadSidebarTags;
