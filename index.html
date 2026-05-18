@@ -133,7 +133,15 @@
 <script>
 async function init() {
   await CL.auth.initAuth();
-  await Promise.all([loadTodaysTop(), loadMarketPulse(), loadBtcTicker(), loadPulseTrend(), loadSidebarTags()]);
+  await Promise.all([
+    loadTodaysTop(),
+    loadMarketPulse(),
+    loadSidebarTags(),
+    loadFearGreed(),
+    loadHourlyChart(),
+    loadPriceSnapshot(),
+  ]);
+  initBtcWebSocket();
   await loadFeed(true);
 }
 
