@@ -116,7 +116,7 @@ a { color: inherit; text-decoration: none; }
 
 .page-grid {
   display: grid;
-  grid-template-columns: 1fr 280px;
+  grid-template-columns: 1fr 340px;
   gap: 2rem;
   padding: 2rem 0;
 }
@@ -596,10 +596,23 @@ a { color: inherit; text-decoration: none; }
   transition: background 0.6s ease;
 }
 
-.pulse-hero.pulse-bullish .pulse-hero-glow { background: linear-gradient(to bottom, rgba(0,200,150,0.18)  0%, transparent 100%); }
-.pulse-hero.pulse-bearish .pulse-hero-glow { background: linear-gradient(to bottom, rgba(255,71,87,0.18)   0%, transparent 100%); }
-.pulse-hero.pulse-neutral .pulse-hero-glow { background: linear-gradient(to bottom, rgba(255,211,42,0.15)  0%, transparent 100%); }
-.pulse-hero.pulse-mixed   .pulse-hero-glow { background: linear-gradient(to bottom, rgba(162,155,254,0.18) 0%, transparent 100%); }
+.pulse-hero.pulse-bullish .pulse-hero-glow { background: linear-gradient(160deg, rgba(0,200,150,0.18)  0%, transparent 60%); }
+.pulse-hero.pulse-bearish .pulse-hero-glow { background: linear-gradient(160deg, rgba(255,71,87,0.18)   0%, transparent 60%); }
+.pulse-hero.pulse-neutral .pulse-hero-glow { background: linear-gradient(160deg, rgba(255,211,42,0.15)  0%, transparent 60%); }
+.pulse-hero.pulse-mixed   .pulse-hero-glow { background: linear-gradient(160deg, rgba(162,155,254,0.18) 0%, transparent 60%); }
+
+.pulse-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 900px) {
+  .pulse-hero-grid { grid-template-columns: 1fr; }
+  .btc-panel { border-left: none !important; padding-left: 0 !important; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1.2rem; margin-top: 1.2rem; }
+}
 
 .pulse-hero-inner {
   position: relative;
@@ -846,3 +859,207 @@ a { color: inherit; text-decoration: none; }
 .kol-empty { color: var(--muted, #8892a4); font-size: 0.85rem; padding: 1rem 0; }
 
 /* ── Market Pulse ───────────────────────────────────────────── */
+
+/* ── BTC PANEL (hero right) ── */
+.btc-panel {
+  border-left: 1px solid rgba(255,255,255,0.06);
+  padding-left: 2.5rem;
+}
+
+.btc-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.28);
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+
+.live-ring {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  flex-shrink: 0;
+  animation: livepulse 1.4s ease-in-out infinite;
+}
+
+@keyframes livepulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 currentColor; }
+  50%       { opacity: 0.5; box-shadow: 0 0 0 4px transparent; }
+}
+
+.btc-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.15rem;
+}
+
+.btc-big {
+  font-family: var(--font-mono);
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--white);
+  transition: text-shadow 0.3s;
+}
+
+.btc-chg {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.btc-range {
+  font-size: 0.62rem;
+  font-family: var(--font-mono);
+  color: rgba(255,255,255,0.2);
+  margin-bottom: 0.8rem;
+}
+
+/* ── HOURLY CHART ── */
+.sent-band {
+  display: flex;
+  gap: 2px;
+  height: 6px;
+  margin-top: 5px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.sb-seg { flex: 1; }
+
+.chart-foot {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3px;
+}
+
+.chart-foot span {
+  font-size: 0.52rem;
+  color: rgba(255,255,255,0.16);
+  font-family: var(--font-mono);
+}
+
+/* ── 14-DAY MINI BARS ── */
+.hero-hist-bars { margin-top: 0.9rem; }
+
+.hist-label {
+  font-size: 0.54rem;
+  font-family: var(--font-mono);
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.hist-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 34px;
+}
+
+.hist-bar {
+  flex: 1;
+  border-radius: 2px 2px 0 0;
+  min-height: 3px;
+}
+
+.hist-dates {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3px;
+}
+
+.hist-dates span {
+  font-size: 0.52rem;
+  color: rgba(255,255,255,0.16);
+  font-family: var(--font-mono);
+}
+
+/* ── PRICE SNAPSHOT ── */
+.price-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.price-row:last-child { border-bottom: none; padding-bottom: 0; }
+.price-row:first-child { padding-top: 0; }
+
+.pr-sym {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  width: 36px;
+  color: rgba(255,255,255,0.55);
+}
+
+.pr-name { font-size: 0.68rem; color: rgba(255,255,255,0.35); flex: 1; }
+
+.pr-price {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--white);
+}
+
+.pr-chg {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  min-width: 52px;
+  text-align: right;
+}
+
+.pr-spark { width: 52px; height: 20px; flex-shrink: 0; }
+
+.live-badge-sm {
+  display: inline-block;
+  background: rgba(0,200,150,0.12);
+  color: #00c896;
+  border-radius: 2px;
+  font-size: 0.52rem;
+  font-family: var(--font-mono);
+  padding: 1px 5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-left: 0.4rem;
+  vertical-align: middle;
+}
+
+/* ── FEAR & GREED ── */
+.fg-bar-wrap {
+  background: rgba(255,255,255,0.04);
+  border-radius: 4px;
+  height: 10px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 0.35rem;
+}
+
+.fg-bar {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  border-radius: 4px;
+}
+
+.fg-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.58rem;
+  color: rgba(255,255,255,0.22);
+  font-family: var(--font-mono);
+  margin-bottom: 0.4rem;
+}
+
+.fg-history {
+  font-size: 0.6rem;
+  color: rgba(255,255,255,0.22);
+  font-family: var(--font-mono);
+}
