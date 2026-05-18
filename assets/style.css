@@ -1063,3 +1063,10 @@ a { color: inherit; text-decoration: none; }
   color: rgba(255,255,255,0.22);
   font-family: var(--font-mono);
 }
+
+/* Fear & Greed in hero panel */
+.btc-panel #fear-greed-block {
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}

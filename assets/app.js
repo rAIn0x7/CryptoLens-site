@@ -530,9 +530,11 @@ async function loadFearGreed() {
     const color = val >= 75 ? '#00c896' : val >= 55 ? '#ffd32a' : val >= 30 ? '#f7931a' : '#ff4757';
 
     el.innerHTML = `
-      <div class="sidebar-title">Crypto Fear &amp; Greed</div>
-      <div style="font-family:var(--font-mono);font-size:1.3rem;font-weight:700;line-height:1;color:${color};margin-bottom:0.2rem">${val}</div>
-      <div style="font-size:0.65rem;color:${color};font-family:var(--font-mono);margin-bottom:0.6rem;letter-spacing:0.06em">${escapeHtml(label.toUpperCase())}</div>
+      <div class="btc-meta" style="margin-bottom:0.4rem">CRYPTO FEAR &amp; GREED</div>
+      <div style="display:flex;align-items:baseline;gap:0.5rem;margin-bottom:0.25rem">
+        <span style="font-family:var(--font-mono);font-size:1.3rem;font-weight:700;line-height:1;color:${color}">${val}</span>
+        <span style="font-size:0.65rem;color:${color};font-family:var(--font-mono);letter-spacing:0.06em">${escapeHtml(label.toUpperCase())}</span>
+      </div>
       <div class="fg-bar-wrap">
         <div class="fg-bar" style="width:${val}%;background:linear-gradient(to right,#ff4757,#ffd32a 50%,#00c896)"></div>
       </div>
