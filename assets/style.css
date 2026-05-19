@@ -100,6 +100,8 @@ a { color: inherit; text-decoration: none; }
 }
 .btn-ghost:hover { color: var(--white); border-color: var(--border-hov); }
 
+.btn-link { background: none; border: none; padding: 0; color: var(--cyan); cursor: pointer; font-size: inherit; text-decoration: underline; }
+
 .btn-primary {
   background: var(--cyan);
   color: #000;
