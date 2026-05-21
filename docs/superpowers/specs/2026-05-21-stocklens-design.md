@@ -56,7 +56,7 @@ Copy from CryptoLens, update branding to StockLens.
 - **Source:** Finnhub WebSocket `wss://ws.finnhub.io?token=<API_KEY>`
 - **Symbol:** `SPY` (S&P 500 ETF as proxy)
 - **Subscribe message:** `{"type":"subscribe","symbol":"SPY"}`
-- **Fallback:** Finnhub REST `GET /quote?symbol=SPY` every 15s
+- **Fallback:** Finnhub REST `GET https://finnhub.io/api/v1/quote?symbol=SPY&token=<KEY>` every 15s
 - Display: price, % change, day range (high/low)
 
 ### Hourly Chart
@@ -75,7 +75,7 @@ Copy from CryptoLens, update branding to StockLens.
 ### Price Snapshot Sidebar (5 stocks)
 - **Source:** Finnhub REST `GET https://finnhub.io/api/v1/quote?symbol=<SYM>&token=<KEY>` (batched, one call per symbol)
 - Symbols: `NVDA, TSLA, AAPL, PLTR, SPY`
-- Sparkline: Finnhub candles `resolution=5&limit=12` (1h of 5-min candles)
+- Sparkline: Finnhub candles `GET https://finnhub.io/api/v1/stock/candle?symbol=<SYM>&resolution=5&from=<1h_ago>&to=<now>&token=<KEY>` (12 data points)
 - Refresh: every 30 seconds
 
 ### AI Signal Feed
