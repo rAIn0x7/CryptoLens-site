@@ -37,8 +37,9 @@
   <div class="nav-actions">
     <span class="badge badge-cat-cross hidden" id="nav-pro-label">PRO</span>
     <a href="https://stocks.qizh.space" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">STOCKS ↗</a>
-    <button class="btn btn-ghost btn-sm" id="nav-login-btn"  onclick="CL.auth.openLoginModal()">Sign In</button>
-    <button class="btn btn-ghost btn-sm hidden" id="nav-logout-btn" onclick="CL.auth.signOut()">Sign Out</button>
+    <button class="btn btn-ghost btn-sm" id="lang-toggle" onclick="toggleLang()">EN</button>
+    <button class="btn btn-ghost btn-sm" id="nav-login-btn"  onclick="CL.auth.openLoginModal()" data-i18n="signIn">Sign In</button>
+    <button class="btn btn-ghost btn-sm hidden" id="nav-logout-btn" onclick="CL.auth.signOut()" data-i18n="signOut">Sign Out</button>
     <a href="subscribe.html" class="btn btn-primary btn-sm">Subscribe</a>
   </div>
 </nav>
@@ -71,7 +72,7 @@
 <div class="container">
   <!-- TODAY'S TOP -->
   <div class="top-section">
-    <div class="section-label">Today's Top Signal</div>
+    <div class="section-label" data-i18n="todayTop">Today's Top Signal</div>
     <div class="top-grid" id="top-grid">
       <div class="card skeleton" style="height:160px"></div>
       <div class="card skeleton" style="height:160px"></div>
@@ -88,7 +89,7 @@
         <div class="card skeleton" style="height:140px"></div>
       </div>
       <div class="load-more">
-        <button id="load-more-btn" onclick="loadFeed()">Load more</button>
+        <button id="load-more-btn" onclick="loadFeed()" data-i18n="loadMore">Load more</button>
       </div>
     </main>
 
@@ -96,20 +97,20 @@
       <div class="sidebar-block" id="price-snapshot-block" style="display:none"></div>
 
       <div class="sidebar-block sidebar-subscribe">
-        <div class="sidebar-title">Free Weekly Signal</div>
-        <p>Top 10 stories every Monday. No spam.</p>
+        <div class="sidebar-title" data-i18n="weeklySignal">Free Weekly Signal</div>
+        <p data-i18n="weeklyDesc">Top 10 stories every Monday. No spam.</p>
         <input type="email" id="sidebar-email" placeholder="your@email.com">
-        <button class="btn btn-primary" style="width:100%" onclick="sidebarSubscribe()">Subscribe Free</button>
+        <button class="btn btn-primary" style="width:100%" onclick="sidebarSubscribe()" data-i18n="subFree">Subscribe Free</button>
         <p class="msg" id="sidebar-msg"></p>
       </div>
 
       <div class="sidebar-block">
-        <div class="sidebar-title">Trending Tags</div>
+        <div class="sidebar-title" data-i18n="trendingTags">Trending Tags</div>
         <div class="sidebar-tags" id="sidebar-tags"></div>
       </div>
 
       <div class="sidebar-block affiliate-block">
-        <span class="aff-label">Sponsored</span>
+        <span class="aff-label" data-i18n="sponsored">Sponsored</span>
         <p>Trade crypto on <a href="https://accounts.binance.com/register?ref=YOUR_REF" target="_blank" rel="noopener" onclick="CL.affiliate.track('binance', null)">Binance</a> — earn rebates on every trade.</p>
       </div>
     </aside>
@@ -134,6 +135,7 @@
 <script>
 async function init() {
   await CL.auth.initAuth();
+  applyLangToDOM();
   await Promise.all([
     loadTodaysTop(),
     loadMarketPulse(),
