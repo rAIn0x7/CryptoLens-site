@@ -6,6 +6,75 @@ let currentTag = null;
 let isLoading = false;
 let hasMore = true;
 
+const STRINGS = {
+  en: {
+    timeJustNow: 'just now',
+    timeHAgo: h => `${h}h ago`,
+    timeDayAgo: d => `${d}d ago`,
+    todayTop: "Today's Top Signal",
+    trendingTags: 'Trending Tags',
+    weeklySignal: 'Free Weekly Signal',
+    weeklyDesc: 'Top 10 stories every Monday. No spam.',
+    subFree: 'Subscribe Free',
+    sponsored: 'Sponsored',
+    loadMore: 'Load more',
+    signIn: 'Sign In',
+    signOut: 'Sign Out',
+    marketPulse: 'MARKET PULSE',
+    basedOn: (n, time) => `Based on ${n} signals · ${time}`,
+    histLabel: '14-DAY HISTORY',
+    today: 'Today',
+    sentiment: { bullish: 'BULLISH', bearish: 'BEARISH', neutral: 'NEUTRAL', mixed: 'MIXED' },
+    liveLabel: live => live ? 'BTC/USD · BINANCE · LIVE' : 'BTC/USD · BINANCE · ~10s',
+    priceSnapshot: 'Price Snapshot',
+  },
+  zh: {
+    timeJustNow: '刚刚',
+    timeHAgo: h => `${h}小时前`,
+    timeDayAgo: d => `${d}天前`,
+    todayTop: '今日热点',
+    trendingTags: '热门标签',
+    weeklySignal: '每周免费信号',
+    weeklyDesc: '每周一推送10条精选，不发垃圾邮件。',
+    subFree: '免费订阅',
+    sponsored: '赞助',
+    loadMore: '加载更多',
+    signIn: '登录',
+    signOut: '退出',
+    marketPulse: '市场脉搏',
+    basedOn: (n, time) => `基于 ${n} 条信号 · ${time}`,
+    histLabel: '14天历史',
+    today: '今日',
+    sentiment: { bullish: '看多', bearish: '看空', neutral: '中性', mixed: '混合' },
+    liveLabel: live => live ? 'BTC/USD · BINANCE · 实时' : 'BTC/USD · BINANCE · ~10秒',
+    priceSnapshot: '价格快照',
+  }
+};
+
+function getLang() { return localStorage.getItem('lens_lang') || 'zh'; }
+function t(key, ...args) {
+  const s = STRINGS[getLang()][key];
+  return typeof s === 'function' ? s(...args) : (s ?? key);
+}
+function setLang(lang) {
+  localStorage.setItem('lens_lang', lang);
+  applyLangToDOM();
+  loadFeed(true);
+  loadTodaysTop();
+  loadMarketPulse();
+}
+function toggleLang() { setLang(getLang() === 'zh' ? 'en' : 'zh'); }
+function applyLangToDOM() {
+  const lang = getLang();
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    const s = STRINGS[lang][key];
+    if (s && typeof s === 'string') el.textContent = s;
+  });
+  const toggle = document.getElementById('lang-toggle');
+  if (toggle) toggle.textContent = lang === 'zh' ? 'EN' : '中';
+}
+
 const CAT_BADGE_CLASS = {
   cross: 'badge-cat-cross', crypto: 'badge-cat-crypto',
   ai: 'badge-cat-ai', regulation: 'badge-cat-regulation', onchain: 'badge-cat-onchain'
@@ -20,9 +89,9 @@ function scoreClass(score) {
 function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const h = Math.floor(diff / 3600000);
-  if (h < 1) return 'just now';
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
+  if (h < 1) return t('timeJustNow');
+  if (h < 24) return t('timeHAgo', h);
+  return t('timeDayAgo', Math.floor(h / 24));
 }
 
 function escapeHtml(s) {
@@ -76,7 +145,7 @@ function renderCard(article, isTop) {
          rel="noopener" onclick="event.stopPropagation()">
         ${article.title}
       </a>
-      <p class="card-summary">${article.summary || ''}${article.summary_zh ? `<span class="summary-zh">${article.summary_zh}</span>` : ''}</p>
+      <p class="card-summary">${getLang() === 'zh' ? (article.summary_zh || article.summary || '') : (article.summary || '')}</p>
       ${tags ? `<div class="card-tags">${tags}</div>` : ''}
       ${renderEditorNote(article)}
     </div>`;
@@ -234,20 +303,20 @@ async function loadMarketPulse() {
 
   container.innerHTML = `
     <div class="pulse-hero-meta">
-      <span class="pulse-label">MARKET PULSE</span>
-      <span class="pulse-time">Based on ${escapeHtml(latest.article_count || '?')} signals · ${timeAgo(latest.created_at)}</span>
+      <span class="pulse-label">${t('marketPulse')}</span>
+      <span class="pulse-time">${t('basedOn', escapeHtml(String(latest.article_count || '?')), timeAgo(latest.created_at))}</span>
     </div>
     <div class="pulse-hero-sentiment">
-      <span class="pulse-hero-mood">${sentKey.toUpperCase()}</span>
+      <span class="pulse-hero-mood">${t('sentiment')[sentKey] || sentKey.toUpperCase()}</span>
       <span class="pulse-hero-score">${sign}${escapeHtml(latest.sentiment_score)}</span>
     </div>
     <p class="pulse-hero-en">${escapeHtml(latest.summary_en)}</p>
     ${themes ? `<div class="pulse-hero-themes">${themes}</div>` : ''}
     ${days.length > 0 ? `
     <div class="hero-hist-bars">
-      <div class="hist-label">14-DAY HISTORY</div>
+      <div class="hist-label">${t('histLabel')}</div>
       <div class="hist-bars">${bars}</div>
-      <div class="hist-dates"><span>${firstDay}</span><span>Today</span></div>
+      <div class="hist-dates"><span>${firstDay}</span><span>${t('today')}</span></div>
     </div>` : ''}`;
 }
 
@@ -291,7 +360,7 @@ function setLiveStatus(live) {
   const ring  = document.getElementById('live-ring');
   const label = document.getElementById('live-status');
   if (ring)  ring.style.background = live ? '#00c896' : 'rgba(255,255,255,0.2)';
-  if (label) label.textContent = live ? 'BTC/USD · BINANCE · LIVE' : 'BTC/USD · BINANCE · ~10s';
+  if (label) label.textContent = t('liveLabel', live);
 }
 
 function updateBtcPrice({ price, change, high, low, volume }) {
@@ -336,6 +405,8 @@ function _startBtcFallbackPoll() {
   _btcWsFallbackTimer = setInterval(poll, 10000);
 }
 
+window.toggleLang = toggleLang;
+window.applyLangToDOM = applyLangToDOM;
 window.setCategory = setCategory;
 window.filterByTag = filterByTag;
 window.openArticle = openArticle;
@@ -501,7 +572,7 @@ async function loadPriceSnapshot() {
       </div>`;
     }).join('');
 
-    el.innerHTML = `<div class="sidebar-title">Price Snapshot <span class="live-badge-sm">LIVE</span></div>${rows}`;
+    el.innerHTML = `<div class="sidebar-title">${t('priceSnapshot')} <span class="live-badge-sm">LIVE</span></div>${rows}`;
     el.style.display = '';
   } catch { el.style.display = 'none'; }
 
