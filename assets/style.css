@@ -1172,3 +1172,14 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   }
   .card, .nav-filter, .btn, .tag { transform: none !important; }
 }
+
+/* ── MOBILE NAV FIX (contain overflow; filters = scroll-strip) ── */
+@media (max-width: 760px){
+  .nav{flex-wrap:wrap; height:auto; padding:10px 16px; gap:8px}
+  .nav-logo{order:0; margin-right:auto}
+  .nav-actions{order:1; margin-left:0; gap:6px; flex-wrap:wrap; justify-content:flex-end}
+  .nav-actions .btn-sm{padding:5px 9px; font-size:.7rem}
+  .nav-filters{order:2; width:100%; flex:0 0 100%; overflow-x:auto; overflow-y:hidden; flex-wrap:nowrap; gap:6px; padding-bottom:3px; scrollbar-width:none}
+  .nav-filters::-webkit-scrollbar{display:none}
+  .nav-filter{flex:0 0 auto; white-space:nowrap}
+}

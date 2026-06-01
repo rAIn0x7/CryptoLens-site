@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://lens.qizh.space/sitemap.xml

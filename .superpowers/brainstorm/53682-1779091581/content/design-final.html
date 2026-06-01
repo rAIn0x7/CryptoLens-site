@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoLens — Final Design</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0e1a;color:#e0e6f0;font-family:'Space Grotesk',system-ui,sans-serif;font-size:14px;line-height:1.5;padding-bottom:4rem}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* ── NAV ── */
+.nav{display:flex;align-items:center;gap:1rem;padding:0 2rem;height:50px;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(10,14,26,0.97);backdrop-filter:blur(12px);position:sticky;top:0;z-index:20}
+.nav-logo{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;letter-spacing:.06em;color:#fff}
+.nav-logo span{color:#00c8ff}
+.nav-filters{display:flex;gap:.2rem;flex:1;justify-content:center}
+.nf{background:none;border:none;color:rgba(255,255,255,.3);font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;letter-spacing:.08em;padding:.3rem .6rem;border-radius:4px;cursor:pointer;transition:all .15s}
+.nf:hover{color:rgba(255,255,255,.7)}
+.nf.active{background:rgba(255,255,255,.08);color:#fff}
+.nav-right{display:flex;align-items:center;gap:.5rem}
+.btn{font-weight:600;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;border-radius:5px}
+.btn-sm{font-size:.68rem;padding:.28rem .75rem}
+.btn-ghost{background:rgba(255,255,255,.06);color:rgba(255,255,255,.55)}
+.btn-primary{background:#00c8ff;color:#000;letter-spacing:.02em}
+
+/* ── HERO ── */
+.hero{border-bottom:1px solid rgba(255,255,255,.06);position:relative;overflow:hidden;padding:1.8rem 2rem 1.4rem}
+.hero-glow{position:absolute;inset:0;pointer-events:none;transition:background .7s ease}
+.hero-glow.bull{background:linear-gradient(160deg,rgba(0,200,150,.13) 0%,transparent 60%)}
+.hero-glow.bear{background:linear-gradient(160deg,rgba(255,71,87,.13) 0%,transparent 60%)}
+.hero-glow.neut{background:linear-gradient(160deg,rgba(255,211,42,.10) 0%,transparent 60%)}
+.hero-inner{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;max-width:1140px;margin:0 auto;position:relative;z-index:1}
+
+/* left */
+.pulse-meta{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.1em;color:rgba(255,255,255,.28);text-transform:uppercase;display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem}
+.pulse-dot{width:6px;height:6px;border-radius:50%}
+.mood-row{display:flex;align-items:baseline;gap:.7rem;margin-bottom:.55rem}
+.mood-word{font-family:'JetBrains Mono',monospace;font-size:2.2rem;font-weight:700;letter-spacing:.02em;transition:color .5s}
+.mood-score{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;opacity:.8;transition:color .5s}
+.hero-summary{font-size:.78rem;color:rgba(255,255,255,.48);line-height:1.6;margin-bottom:.75rem}
+.theme-tags{display:flex;gap:.35rem;flex-wrap:wrap;margin-bottom:1rem}
+.ttag{font-size:.58rem;font-family:'JetBrains Mono',monospace;padding:3px 8px;border-radius:3px;font-weight:600;letter-spacing:.04em;border:1px solid}
+/* 14-day bars */
+.hist-label{font-size:.54rem;font-family:monospace;color:rgba(255,255,255,.2);letter-spacing:.06em;margin-bottom:5px}
+.hist-bars{display:flex;align-items:flex-end;gap:3px;height:34px}
+.hb{flex:1;border-radius:2px 2px 0 0;min-height:3px;transition:opacity .3s}
+.hist-dates{display:flex;justify-content:space-between;margin-top:3px}
+.hist-dates span{font-size:.52rem;color:rgba(255,255,255,.16);font-family:monospace}
+
+/* right */
+.btc-panel{border-left:1px solid rgba(255,255,255,.06);padding-left:2.5rem}
+.btc-meta{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.1em;color:rgba(255,255,255,.28);text-transform:uppercase;display:flex;align-items:center;gap:.4rem;margin-bottom:.6rem}
+.live-ring{width:7px;height:7px;border-radius:50%;animation:livepulse 1.4s ease-in-out infinite}
+@keyframes livepulse{0%,100%{opacity:1;box-shadow:0 0 0 0 currentColor}50%{opacity:.5;box-shadow:0 0 0 3px transparent}}
+.btc-price-row{display:flex;align-items:baseline;gap:.6rem;margin-bottom:.15rem}
+.btc-big{font-family:'JetBrains Mono',monospace;font-size:1.9rem;font-weight:700;color:#fff;transition:text-shadow .3s}
+.btc-chg{font-family:'JetBrains Mono',monospace;font-size:.82rem}
+.btc-range{font-size:.62rem;font-family:monospace;color:rgba(255,255,255,.2);margin-bottom:.8rem}
+/* chart */
+.chart-wrap{position:relative}
+.chart-svg{width:100%;height:88px;display:block}
+.sent-band{display:flex;gap:2px;height:6px;margin-top:5px;border-radius:2px;overflow:hidden}
+.sb-seg{flex:1}
+.chart-foot{display:flex;justify-content:space-between;margin-top:3px}
+.chart-foot span{font-size:.52rem;color:rgba(255,255,255,.16);font-family:monospace}
+
+/* ── CONTENT ── */
+.content{max-width:1140px;margin:0 auto;padding:1.4rem 2rem}
+
+/* top cards */
+.top-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.1em;color:rgba(255,255,255,.28);text-transform:uppercase;margin-bottom:.75rem}
+.top-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem;margin-bottom:1.6rem}
+.top-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.85rem;cursor:pointer;transition:border-color .15s,transform .15s}
+.top-card:hover{border-color:rgba(255,255,255,.14);transform:translateY(-1px)}
+.tc-cat{font-size:.56rem;font-family:monospace;padding:2px 7px;border-radius:2px;font-weight:700;letter-spacing:.04em;display:inline-block;margin-bottom:.5rem}
+.cat-cross{background:rgba(162,155,254,.12);color:#a29bfe}
+.cat-crypto{background:rgba(0,200,150,.1);color:#00c896}
+.cat-ai{background:rgba(0,200,255,.1);color:#00c8ff}
+.tc-title{font-size:.82rem;font-weight:600;line-height:1.38;color:#fff;margin-bottom:.35rem}
+.tc-meta{font-size:.62rem;color:rgba(255,255,255,.26)}
+
+/* main 2-col */
+.main-grid{display:grid;grid-template-columns:1fr 340px;gap:1.6rem}
+
+/* feed */
+.feed-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:.85rem 1rem;margin-bottom:.7rem;display:flex;gap:.85rem;cursor:pointer;transition:border-color .15s}
+.feed-card:hover{border-color:rgba(255,255,255,.12)}
+.fc-score{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:rgba(255,255,255,.6);min-width:28px;padding-top:1px}
+.fc-body{flex:1}
+.fc-title{font-size:.83rem;font-weight:600;color:#fff;margin-bottom:.22rem;line-height:1.38}
+.fc-summary{font-size:.72rem;color:rgba(255,255,255,.4);line-height:1.48;margin-bottom:.35rem}
+.fc-foot{display:flex;align-items:center;gap:.45rem}
+.fc-src{font-size:.6rem;color:rgba(255,255,255,.25)}
+.fc-time{font-size:.58rem;color:rgba(255,255,255,.16);font-family:monospace}
+.load-more{text-align:center;margin-top:.5rem}
+.load-more button{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.45);font-size:.72rem;padding:.4rem 1.2rem;border-radius:5px;cursor:pointer;font-family:'Space Grotesk',sans-serif}
+
+/* ── SIDEBAR — WIDE ── */
+.sidebar{display:flex;flex-direction:column;gap:.85rem}
+.sb-block{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:.85rem}
+.sb-title{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.1em;color:rgba(255,255,255,.28);text-transform:uppercase;margin-bottom:.7rem}
+
+/* price snapshot */
+.price-row{display:flex;align-items:center;gap:.5rem;padding:.4rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.price-row:last-child{border-bottom:none;padding-bottom:0}
+.price-row:first-child{padding-top:0}
+.pr-sym{font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:700;width:36px;color:rgba(255,255,255,.55)}
+.pr-name{font-size:.68rem;color:rgba(255,255,255,.35);flex:1}
+.pr-price{font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:700;color:#fff}
+.pr-chg{font-family:'JetBrains Mono',monospace;font-size:.65rem;min-width:48px;text-align:right}
+.pr-spark{width:52px;height:20px;flex-shrink:0}
+
+/* fear greed */
+.fg-bar-wrap{background:rgba(255,255,255,.04);border-radius:4px;height:10px;position:relative;overflow:hidden;margin-bottom:.4rem}
+.fg-bar{position:absolute;left:0;top:0;bottom:0;border-radius:4px;transition:width .6s ease}
+.fg-label{display:flex;justify-content:space-between;font-size:.6rem;font-family:monospace;color:rgba(255,255,255,.25)}
+.fg-value{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;margin-bottom:.2rem}
+
+/* subscribe */
+.sb-email{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:5px;padding:.42rem .7rem;color:#fff;font-size:.76rem;font-family:'Space Grotesk',sans-serif;outline:none;margin-bottom:.5rem}
+.sb-email::placeholder{color:rgba(255,255,255,.25)}
+.sb-btn{width:100%;background:#00c8ff;color:#000;border:none;border-radius:5px;padding:.44rem;font-size:.74rem;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif;letter-spacing:.02em}
+.sb-note{font-size:.62rem;color:rgba(255,255,255,.22);margin-top:.4rem;text-align:center}
+
+/* tags */
+.tags-wrap{display:flex;flex-wrap:wrap;gap:.35rem}
+.tag-pill{font-size:.62rem;font-family:monospace;padding:3px 9px;border-radius:20px;background:rgba(255,255,255,.05);color:rgba(255,255,255,.4);cursor:pointer;transition:all .15s;border:1px solid rgba(255,255,255,.06)}
+.tag-pill:hover{background:rgba(255,255,255,.09);color:rgba(255,255,255,.75)}
+
+/* annotation overlay */
+.ann{position:fixed;bottom:1.5rem;right:1.5rem;z-index:100;display:flex;flex-direction:column;gap:.5rem;align-items:flex-end}
+.ann-confirm{background:#00c896;color:#000;border:none;border-radius:8px;padding:.55rem 1.3rem;font-weight:700;font-size:.8rem;cursor:pointer;font-family:'Space Grotesk',sans-serif;box-shadow:0 4px 20px rgba(0,200,150,.3)}
+
+/* callout badges */
+.new-badge{display:inline-block;background:rgba(0,200,255,.15);color:#00c8ff;border:1px solid rgba(0,200,255,.25);border-radius:3px;font-size:.52rem;font-family:monospace;padding:1px 6px;font-weight:700;letter-spacing:.04em;margin-left:.4rem;vertical-align:middle}
+</style>
+</head>
+<body>
+
+<div style="background:rgba(99,179,237,.08);border-bottom:1px solid rgba(99,179,237,.12);padding:.45rem 2rem;font-size:.7rem;color:rgba(99,179,237,.75);font-family:monospace;display:flex;justify-content:space-between;align-items:center">
+  <span>最终设计预览 · Layout C Hero + B 宽侧边栏 · 模拟数据</span>
+  <span>点击 Hero 区切换情绪 · 价格每 2s 模拟跳动</span>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <span class="nav-logo mono">CRYPTO<span>LENS</span></span>
+  <div class="nav-filters">
+    <button class="nf active">ALL</button>
+    <button class="nf">CROSS</button>
+    <button class="nf">CRYPTO</button>
+    <button class="nf">AI</button>
+    <button class="nf">REGULATION</button>
+    <button class="nf">ON-CHAIN</button>
+  </div>
+  <div class="nav-right">
+    <button class="btn btn-sm btn-ghost">Sign In</button>
+    <button class="btn btn-sm btn-primary">Subscribe</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero" id="hero-el" style="cursor:pointer">
+  <div class="hero-glow bull" id="hero-glow"></div>
+  <div class="hero-inner">
+
+    <!-- LEFT: Sentiment -->
+    <div>
+      <div class="pulse-meta">
+        <div class="pulse-dot" id="pulse-dot" style="background:#00c896"></div>
+        MARKET PULSE · 47 SIGNALS · 2H AGO
+      </div>
+      <div class="mood-row">
+        <span class="mood-word" id="mood-word" style="color:#00c896">BULLISH</span>
+        <span class="mood-score" id="mood-score" style="color:#00c896">+68</span>
+      </div>
+      <p class="hero-summary">BTC consolidates above $103k as ETF inflows hit a single-day record. Altcoin rotation signals are building across DeFi. EU MiCA enforcement boosts institutional confidence in compliant assets.</p>
+      <div class="theme-tags" id="theme-tags">
+        <span class="ttag" style="color:#00c896;border-color:rgba(0,200,150,.25);background:rgba(0,200,150,.08)">ETF FLOWS</span>
+        <span class="ttag" style="color:#00c896;border-color:rgba(0,200,150,.2);background:rgba(0,200,150,.06)">BTC DOMINANCE</span>
+        <span class="ttag" style="color:#00c896;border-color:rgba(0,200,150,.2);background:rgba(0,200,150,.06)">EU REGULATION</span>
+        <span class="ttag" style="color:#00c896;border-color:rgba(0,200,150,.18);background:rgba(0,200,150,.05)">ALTSEASON</span>
+      </div>
+      <div>
+        <div class="hist-label">14-DAY SENTIMENT HISTORY</div>
+        <div class="hist-bars">
+          <div class="hb" style="height:44%;background:#ff4757;opacity:.65"></div>
+          <div class="hb" style="height:18%;background:#ffd32a;opacity:.5"></div>
+          <div class="hb" style="height:28%;background:#ffd32a;opacity:.6"></div>
+          <div class="hb" style="height:52%;background:#00c896;opacity:.55"></div>
+          <div class="hb" style="height:22%;background:#ff4757;opacity:.45"></div>
+          <div class="hb" style="height:14%;background:#ffd32a;opacity:.4"></div>
+          <div class="hb" style="height:58%;background:#00c896;opacity:.62"></div>
+          <div class="hb" style="height:68%;background:#00c896;opacity:.7"></div>
+          <div class="hb" style="height:38%;background:#ff4757;opacity:.42"></div>
+          <div class="hb" style="height:62%;background:#00c896;opacity:.68"></div>
+          <div class="hb" style="height:72%;background:#00c896;opacity:.75"></div>
+          <div class="hb" style="height:78%;background:#00c896;opacity:.82"></div>
+          <div class="hb" style="height:88%;background:#00c896;opacity:.9"></div>
+          <div class="hb" style="height:100%;background:#00c896;opacity:1;box-shadow:0 0 10px rgba(0,200,150,.45)"></div>
+        </div>
+        <div class="hist-dates"><span>May 4</span><span>Today</span></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: BTC WebSocket -->
+    <div class="btc-panel">
+      <div class="btc-meta">
+        <div class="live-ring" id="live-ring" style="background:#00c896;color:#00c896"></div>
+        BTC/USD · BINANCE · WEBSOCKET LIVE
+        <span class="new-badge">NEW</span>
+      </div>
+      <div class="btc-price-row">
+        <span class="btc-big" id="btc-price">$103,420</span>
+        <span class="btc-chg" id="btc-chg" style="color:#00c896">▲ +2.34%</span>
+      </div>
+      <div class="btc-range" id="btc-range">24h 低: $100,812 &nbsp;·&nbsp; 高: $104,233 &nbsp;·&nbsp; 成交量: 28.4k BTC</div>
+
+      <!-- 24h hourly chart -->
+      <div class="chart-wrap">
+        <svg class="chart-svg" viewBox="0 0 380 88" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="btcFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f7931a" stop-opacity=".22"/>
+              <stop offset="100%" stop-color="#f7931a" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <line x1="0" y1="20" x2="380" y2="20" stroke="rgba(255,255,255,.04)" stroke-dasharray="4,3"/>
+          <line x1="0" y1="52" x2="380" y2="52" stroke="rgba(255,255,255,.04)" stroke-dasharray="4,3"/>
+          <path d="M0,75 16,72 32,77 48,68 64,63 80,60 96,65 112,57 128,52 144,47 160,51 176,42 192,37 208,33 224,40 240,29 256,25 272,31 288,21 304,18 320,26 336,15 352,18 368,12 380,8 380,88 0,88Z" fill="url(#btcFill)"/>
+          <path d="M0,75 16,72 32,77 48,68 64,63 80,60 96,65 112,57 128,52 144,47 160,51 176,42 192,37 208,33 224,40 240,29 256,25 272,31 288,21 304,18 320,26 336,15 352,18 368,12 380,8" fill="none" stroke="#f7931a" stroke-width="1.8" stroke-linejoin="round"/>
+          <circle cx="380" cy="8" r="3.5" fill="#f7931a" stroke="rgba(0,0,0,.5)" stroke-width="1.5"/>
+          <circle cx="380" cy="8" r="7" fill="none" stroke="#f7931a" stroke-width="1" opacity=".35"/>
+          <text x="375" y="6.5" font-size="7" fill="rgba(247,147,26,.65)" font-family="monospace" text-anchor="end">$104.2k</text>
+          <text x="375" y="86" font-size="7" fill="rgba(247,147,26,.45)" font-family="monospace" text-anchor="end">$100.8k</text>
+        </svg>
+        <!-- sentiment color band -->
+        <div class="sent-band">
+          <div class="sb-seg" style="background:#ffd32a;opacity:.5"></div>
+          <div class="sb-seg" style="background:#ffd32a;opacity:.45"></div>
+          <div class="sb-seg" style="background:#00c896;opacity:.5"></div>
+          <div class="sb-seg" style="background:#00c896;opacity:.6"></div>
+          <div class="sb-seg" style="background:#00c896;opacity:.7"></div>
+          <div class="sb-seg" style="background:#00c896;opacity:.75"></div>
+          <div class="sb-seg" style="background:#00c896;opacity:.8"></div>
+          <div class="sb-seg" style="background:#00c896;opacity:.75"></div>
+          <div class="sb-seg" style="background:#ff4757;opacity:.4"></div>
+          <div class="sb-seg" style="background:#ff4757;opacity:.48"></div>
+          <div class="sb-seg" style="background:#ffd32a;opacity:.4"></div>
+          <div class="sb-seg" style="background:#00c896;opacity:.65"></div>
+          <div class="sb-seg" style="background:#00c896;opacity:.82"></div>
+          <div class="sb-seg" style="background:#00c896;opacity:.92"></div>
+          <div class="sb-seg" style="background:#00c896;opacity:1"></div>
+        </div>
+        <div class="chart-foot">
+          <span>00:00</span>
+          <span style="color:rgba(255,255,255,.1)">▓ sentiment</span>
+          <span>now</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- Today's Top -->
+  <div class="top-label">Today's Top Signals</div>
+  <div class="top-grid">
+    <div class="top-card">
+      <span class="tc-cat cat-cross">CROSS</span>
+      <div class="tc-title">BlackRock IBIT hits $2.1B single-day inflow — biggest since launch</div>
+      <div class="tc-meta">The Block · 1h ago · ★ 9.2</div>
+    </div>
+    <div class="top-card">
+      <span class="tc-cat cat-ai">AI × CRYPTO</span>
+      <div class="tc-title">Coinbase integrates Claude for on-chain transaction explanations</div>
+      <div class="tc-meta">Decrypt · 3h ago · ★ 8.7</div>
+    </div>
+    <div class="top-card">
+      <span class="tc-cat cat-crypto">CRYPTO</span>
+      <div class="tc-title">EU MiCA enforcement begins: three exchanges receive compliance notices</div>
+      <div class="tc-meta">CoinTelegraph · 5h ago · ★ 8.4</div>
+    </div>
+  </div>
+
+  <!-- Feed + Wide Sidebar -->
+  <div class="main-grid">
+
+    <!-- FEED -->
+    <main>
+      <div class="feed-card">
+        <span class="fc-score">9.2</span>
+        <div class="fc-body">
+          <div class="fc-title">BlackRock IBIT sees record $2.1B single-day inflow as BTC breaks out above $103k</div>
+          <div class="fc-summary">Institutional demand accelerating heading into the weekend. Analysts project $120k as next resistance if ETF flows sustain through the week.</div>
+          <div class="fc-foot"><span class="tc-cat cat-cross" style="font-size:.54rem;margin:0">CROSS</span><span class="fc-src">The Block</span><span class="fc-time">1h ago</span></div>
+        </div>
+      </div>
+      <div class="feed-card">
+        <span class="fc-score">8.7</span>
+        <div class="fc-body">
+          <div class="fc-title">Coinbase integrates Claude for natural-language on-chain transaction explanations</div>
+          <div class="fc-summary">Users can ask questions about wallet activity in plain English. Powered by Anthropic's Claude API. Rollout begins for US users this week.</div>
+          <div class="fc-foot"><span class="tc-cat cat-ai" style="font-size:.54rem;margin:0">AI</span><span class="fc-src">Decrypt</span><span class="fc-time">3h ago</span></div>
+        </div>
+      </div>
+      <div class="feed-card">
+        <span class="fc-score">8.1</span>
+        <div class="fc-body">
+          <div class="fc-title">Ethereum L2 transaction volume surpasses mainnet for 30th consecutive day</div>
+          <div class="fc-summary">Base and Arbitrum account for 67% of combined L1+L2 volume. Gas fees on mainnet remain elevated at 12 gwei average.</div>
+          <div class="fc-foot"><span class="tc-cat cat-crypto" style="font-size:.54rem;margin:0">CRYPTO</span><span class="fc-src">Blockworks</span><span class="fc-time">5h ago</span></div>
+        </div>
+      </div>
+      <div class="feed-card">
+        <span class="fc-score">7.8</span>
+        <div class="fc-body">
+          <div class="fc-title">Solana DEX volume hits $8.2B weekly — highest since January peak</div>
+          <div class="fc-summary">Jupiter and Raydium lead gains. Meme coin activity driving volume but analysts warn of retail-driven froth similar to Q1 patterns.</div>
+          <div class="fc-foot"><span class="tc-cat cat-crypto" style="font-size:.54rem;margin:0">CRYPTO</span><span class="fc-src">The Defiant</span><span class="fc-time">7h ago</span></div>
+        </div>
+      </div>
+      <div class="load-more"><button>Load more</button></div>
+    </main>
+
+    <!-- WIDE SIDEBAR -->
+    <aside class="sidebar">
+
+      <!-- Price Snapshot -->
+      <div class="sb-block">
+        <div class="sb-title">Price Snapshot <span class="new-badge">LIVE</span></div>
+        <div class="price-row">
+          <span class="pr-sym">BTC</span>
+          <span class="pr-name">Bitcoin</span>
+          <span class="pr-price" id="sb-btc">$103,420</span>
+          <span class="pr-chg" style="color:#00c896">+2.34%</span>
+          <svg class="pr-spark" viewBox="0 0 52 20" preserveAspectRatio="none">
+            <polyline points="0,16 8,14 16,17 24,11 32,8 40,5 52,2" fill="none" stroke="#00c896" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="price-row">
+          <span class="pr-sym">ETH</span>
+          <span class="pr-name">Ethereum</span>
+          <span class="pr-price">$2,641</span>
+          <span class="pr-chg" style="color:#00c896">+1.82%</span>
+          <svg class="pr-spark" viewBox="0 0 52 20" preserveAspectRatio="none">
+            <polyline points="0,14 8,12 16,15 24,10 32,12 40,7 52,5" fill="none" stroke="#00c896" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="price-row">
+          <span class="pr-sym">SOL</span>
+          <span class="pr-name">Solana</span>
+          <span class="pr-price">$178.40</span>
+          <span class="pr-chg" style="color:#ff4757">−0.91%</span>
+          <svg class="pr-spark" viewBox="0 0 52 20" preserveAspectRatio="none">
+            <polyline points="0,6 8,8 16,5 24,9 32,11 40,14 52,16" fill="none" stroke="#ff4757" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="price-row">
+          <span class="pr-sym">BNB</span>
+          <span class="pr-name">BNB Chain</span>
+          <span class="pr-price">$643</span>
+          <span class="pr-chg" style="color:#00c896">+0.54%</span>
+          <svg class="pr-spark" viewBox="0 0 52 20" preserveAspectRatio="none">
+            <polyline points="0,12 8,11 16,13 24,10 32,9 40,8 52,7" fill="none" stroke="#00c896" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Fear & Greed -->
+      <div class="sb-block">
+        <div class="sb-title">Crypto Fear &amp; Greed</div>
+        <div class="fg-value" style="color:#00c896">72</div>
+        <div style="font-size:.65rem;color:#00c896;font-family:monospace;margin-bottom:.6rem">GREED</div>
+        <div class="fg-bar-wrap">
+          <div class="fg-bar" style="width:72%;background:linear-gradient(to right,#ff4757,#ffd32a,#00c896)"></div>
+        </div>
+        <div class="fg-label"><span>Fear</span><span>Neutral</span><span>Greed</span></div>
+        <div style="font-size:.62rem;color:rgba(255,255,255,.22);margin-top:.5rem">昨日: 68 · 上周: 61 · 上月: 74</div>
+      </div>
+
+      <!-- Subscribe -->
+      <div class="sb-block" style="background:rgba(0,200,255,.04);border-color:rgba(0,200,255,.1)">
+        <div class="sb-title">Free Weekly Signal</div>
+        <p style="font-size:.72rem;color:rgba(255,255,255,.38);margin-bottom:.65rem;line-height:1.5">每周一 Top 10 精选，不发垃圾邮件。</p>
+        <input class="sb-email" placeholder="your@email.com">
+        <button class="sb-btn">Subscribe Free</button>
+        <div class="sb-note">已有 1,240 位读者</div>
+      </div>
+
+      <!-- Trending Tags -->
+      <div class="sb-block">
+        <div class="sb-title">Trending Tags</div>
+        <div class="tags-wrap">
+          <span class="tag-pill">ETF</span>
+          <span class="tag-pill">BlackRock</span>
+          <span class="tag-pill">MiCA</span>
+          <span class="tag-pill">Base</span>
+          <span class="tag-pill">Claude AI</span>
+          <span class="tag-pill">L2</span>
+          <span class="tag-pill">Altseason</span>
+          <span class="tag-pill">Solana</span>
+          <span class="tag-pill">DeFi</span>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+<!-- Confirm button -->
+<div class="ann">
+  <button class="ann-confirm" id="confirm-btn" onclick="confirm()">✓ 确认此设计</button>
+</div>
+
+<script>
+// Simulate BTC price WebSocket ticks
+const prices = [103420,103418,103431,103425,103438,103442,103435,103449,103456,103448,103461,103455];
+let pi = 0;
+setInterval(() => {
+  pi = (pi + 1) % prices.length;
+  const p = prices[pi];
+  const fmt = '$' + p.toLocaleString('en');
+  ['btc-price','sb-btc'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = fmt;
+    el.style.textShadow = '0 0 10px rgba(247,147,26,.5)';
+    setTimeout(() => el.style.textShadow = '', 350);
+  });
+}, 1900);
+
+// Click hero to cycle sentiment
+const moods = [
+  { word:'BULLISH', score:'+68', color:'#00c896', glow:'bull', tagColor:'rgba(0,200,150,.25)', tagBg:'rgba(0,200,150,.08)' },
+  { word:'BEARISH', score:'−42', color:'#ff4757', glow:'bear', tagColor:'rgba(255,71,87,.25)', tagBg:'rgba(255,71,87,.07)' },
+  { word:'NEUTRAL', score:'+8',  color:'#ffd32a', glow:'neut', tagColor:'rgba(255,211,42,.25)', tagBg:'rgba(255,211,42,.07)' },
+];
+let mi = 0;
+document.getElementById('hero-el').addEventListener('click', e => {
+  if (e.target.closest('button,input')) return;
+  mi = (mi + 1) % moods.length;
+  const m = moods[mi];
+  document.getElementById('mood-word').textContent = m.word;
+  document.getElementById('mood-word').style.color = m.color;
+  document.getElementById('mood-score').textContent = m.score;
+  document.getElementById('mood-score').style.color = m.color;
+  document.getElementById('pulse-dot').style.background = m.color;
+  const glow = document.getElementById('hero-glow');
+  glow.className = 'hero-glow ' + m.glow;
+  document.querySelectorAll('.ttag').forEach(t => {
+    t.style.color = m.color;
+    t.style.borderColor = m.tagColor;
+    t.style.background = m.tagBg;
+  });
+});
+
+function confirm() {
+  document.getElementById('confirm-btn').textContent = '✓ 已确认！开始实现';
+  if (window.parent) window.parent.postMessage({type:'choice',choice:'confirmed',text:'Final design confirmed'}, '*');
+}
+</script>
+</body>
+</html>

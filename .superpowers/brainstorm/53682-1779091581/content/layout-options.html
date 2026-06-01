@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Layout Options</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0e1a;color:#e0e6f0;font-family:'Space Grotesk',system-ui,sans-serif;font-size:13px;padding:1.2rem 1.4rem}
+
+h2{font-size:1rem;font-weight:600;color:#fff;margin-bottom:0.25rem}
+.sub{font-size:0.75rem;color:rgba(255,255,255,0.38);margin-bottom:1.4rem}
+
+.options{display:flex;flex-direction:column;gap:1.2rem}
+.opt{background:rgba(255,255,255,0.03);border:1.5px solid rgba(255,255,255,0.07);border-radius:12px;overflow:hidden;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.opt:hover{border-color:rgba(99,179,237,0.4)}
+.opt.selected{border-color:#63b3ed;box-shadow:0 0 0 3px rgba(99,179,237,0.14)}
+.opt-head{display:flex;align-items:flex-start;gap:.7rem;padding:.85rem 1rem .6rem}
+.letter{width:26px;height:26px;border-radius:50%;background:rgba(99,179,237,0.1);border:1.5px solid rgba(99,179,237,0.3);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#63b3ed;flex-shrink:0;margin-top:1px}
+.opt-title{font-weight:600;font-size:.88rem;margin-bottom:.2rem}
+.opt-desc{font-size:.73rem;color:rgba(255,255,255,.38);line-height:1.5}
+.badge{display:inline-block;font-size:.55rem;font-family:monospace;padding:2px 6px;border-radius:3px;font-weight:700;letter-spacing:.04em;margin-left:.4rem;vertical-align:middle}
+.rec{background:rgba(0,200,150,.15);color:#00c896}
+
+/* wireframe colors */
+.wf{padding:0 1rem 1rem}
+.mock-nav{height:36px;background:rgba(255,255,255,.04);border-radius:6px;margin-bottom:.5rem;display:flex;align-items:center;padding:0 .8rem;gap:.6rem}
+.mock-logo{width:80px;height:10px;background:rgba(255,255,255,.15);border-radius:2px}
+.mock-pills{display:flex;gap:.3rem;flex:1;justify-content:center}
+.pill{height:8px;border-radius:2px;background:rgba(255,255,255,.08)}
+.mock-hero{height:80px;background:rgba(255,255,255,.04);border-radius:6px;margin-bottom:.5rem;display:flex;gap:.5rem;overflow:hidden}
+.hero-left{flex:1;padding:.5rem .6rem;border-right:1px solid rgba(255,255,255,.05)}
+.hero-right{flex:1;padding:.5rem .6rem}
+.h-score{height:16px;width:70px;background:rgba(0,200,150,.3);border-radius:2px;margin-bottom:.3rem}
+.h-text{height:6px;background:rgba(255,255,255,.08);border-radius:1px;margin-bottom:.2rem}
+.h-text.w60{width:60%}
+.h-text.w80{width:80%}
+.h-text.w45{width:45%}
+.h-btc{height:20px;width:90px;background:rgba(247,147,26,.2);border-radius:2px;margin-bottom:.3rem}
+.h-chart{flex:1;height:28px;background:rgba(247,147,26,.06);border-radius:2px;position:relative;overflow:hidden}
+.h-chart::after{content:'';position:absolute;bottom:0;left:0;right:0;height:60%;background:linear-gradient(to right,rgba(247,147,26,.1),rgba(247,147,26,.3));border-radius:2px}
+
+/* LAYOUT A: 3-column */
+.three-col{display:grid;grid-template-columns:1fr 1.6fr 1fr;gap:.4rem;height:130px}
+.col-block{background:rgba(255,255,255,.04);border-radius:5px;padding:.4rem .5rem;display:flex;flex-direction:column;gap:.25rem;overflow:hidden}
+.col-label{font-size:.52rem;font-family:monospace;color:rgba(255,255,255,.2);letter-spacing:.06em;text-transform:uppercase;margin-bottom:.15rem}
+.row-line{height:6px;background:rgba(255,255,255,.07);border-radius:1px}
+.row-line.accent{background:rgba(0,200,150,.25)}
+.row-line.orange{background:rgba(247,147,26,.2)}
+.row-line.purple{background:rgba(162,155,254,.2)}
+.row-line.short{width:65%}
+.row-line.xshort{width:40%}
+.widget{background:rgba(255,255,255,.05);border-radius:4px;padding:.3rem .4rem;margin-bottom:.2rem}
+.widget-t{height:5px;background:rgba(255,255,255,.12);border-radius:1px;margin-bottom:.2rem;width:55%}
+.widget-b{height:4px;background:rgba(255,255,255,.06);border-radius:1px}
+.widget-price{height:11px;background:rgba(247,147,26,.25);border-radius:1px;margin-bottom:.15rem;width:70%}
+.mini-stat{display:flex;justify-content:space-between;margin-bottom:.15rem}
+.ms-l{height:4px;width:40%;background:rgba(255,255,255,.1);border-radius:1px}
+.ms-r{height:4px;width:25%;background:rgba(0,200,150,.25);border-radius:1px}
+.ms-rr{height:4px;width:25%;background:rgba(255,71,87,.25);border-radius:1px}
+
+/* LAYOUT B: Wide sidebar */
+.two-col-wide{display:grid;grid-template-columns:1fr 320px;gap:.4rem;height:130px}
+.feed-col{background:rgba(255,255,255,.04);border-radius:5px;padding:.4rem .5rem;display:flex;flex-direction:column;gap:.3rem;overflow:hidden}
+.feed-row{display:flex;gap:.4rem;align-items:center;padding-bottom:.25rem;border-bottom:1px solid rgba(255,255,255,.04)}
+.feed-num{width:16px;height:16px;background:rgba(255,255,255,.08);border-radius:2px;flex-shrink:0}
+.feed-lines{flex:1;display:flex;flex-direction:column;gap:.2rem}
+.sidebar-col{display:flex;flex-direction:column;gap:.3rem;overflow:hidden}
+.sb-widget{background:rgba(255,255,255,.04);border-radius:5px;padding:.4rem .5rem;flex:1}
+
+/* LAYOUT C: magazine top + full feed */
+.mag-top{display:grid;grid-template-columns:1.8fr 1fr;gap:.4rem;height:68px;margin-bottom:.4rem}
+.mag-featured{background:rgba(255,255,255,.05);border-radius:5px;padding:.4rem .5rem}
+.mag-stack{display:flex;flex-direction:column;gap:.3rem}
+.mag-small{background:rgba(255,255,255,.04);border-radius:5px;padding:.3rem .4rem;flex:1}
+.full-feed{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;height:55px}
+.ff-card{background:rgba(255,255,255,.04);border-radius:5px;padding:.35rem .4rem;display:flex;flex-direction:column;gap:.2rem}
+
+/* color accent strips */
+.strip{height:3px;border-radius:1px 1px 0 0}
+.strip-green{background:rgba(0,200,150,.5)}
+.strip-blue{background:rgba(0,200,255,.4)}
+.strip-orange{background:rgba(247,147,26,.4)}
+.strip-purple{background:rgba(162,155,254,.4)}
+</style>
+</head>
+<body>
+
+<h2>内容区布局方案</h2>
+<p class="sub">Hero 保持不变，对比以下三种内容区排布方式</p>
+
+<div class="options">
+
+  <!-- ══ OPTION A: 3-column ══ -->
+  <div class="opt" data-choice="a" onclick="toggleSelect(this)">
+    <div class="opt-head">
+      <div class="letter">A</div>
+      <div>
+        <div class="opt-title">三栏布局 — 左市场数据 · 中Feed · 右工具</div>
+        <div class="opt-desc">左栏放 BTC/ETH 实时价格 + 市值占比；中栏主 Feed；右栏订阅 + 标签 + 恐惧贪婪指数。视觉最对称，信息密度高。</div>
+      </div>
+    </div>
+    <div class="wf">
+      <!-- nav -->
+      <div class="mock-nav"><div class="mock-logo"></div><div class="mock-pills"><div class="pill" style="width:24px"></div><div class="pill" style="width:32px"></div><div class="pill" style="width:28px"></div><div class="pill" style="width:24px"></div></div><div class="pill" style="width:40px"></div></div>
+      <!-- hero -->
+      <div class="mock-hero"><div class="hero-left"><div class="h-score"></div><div class="h-text w80"></div><div class="h-text w60"></div></div><div class="hero-right"><div class="h-btc"></div><div class="h-chart"></div></div></div>
+      <!-- 3-col -->
+      <div class="three-col">
+        <div class="col-block">
+          <div class="col-label">Market Data</div>
+          <div class="widget"><div class="widget-price"></div><div class="mini-stat"><div class="ms-l"></div><div class="ms-r"></div></div><div class="mini-stat"><div class="ms-l"></div><div class="ms-rr"></div></div></div>
+          <div class="widget"><div class="widget-t"></div><div class="mini-stat"><div class="ms-l"></div><div class="ms-r"></div></div></div>
+          <div class="widget"><div class="widget-t"></div><div class="widget-b"></div></div>
+        </div>
+        <div class="col-block">
+          <div class="col-label">Feed</div>
+          <div class="feed-row"><div class="feed-num"></div><div class="feed-lines"><div class="row-line accent"></div><div class="row-line short"></div></div></div>
+          <div class="feed-row"><div class="feed-num"></div><div class="feed-lines"><div class="row-line orange"></div><div class="row-line short"></div></div></div>
+          <div class="feed-row"><div class="feed-num"></div><div class="feed-lines"><div class="row-line purple"></div><div class="row-line short"></div></div></div>
+          <div class="feed-row"><div class="feed-num"></div><div class="feed-lines"><div class="row-line accent"></div><div class="row-line short"></div></div></div>
+        </div>
+        <div class="col-block">
+          <div class="col-label">Tools</div>
+          <div class="widget"><div class="widget-t"></div><div class="row-line xshort" style="height:18px;background:rgba(0,200,255,.12);border-radius:2px"></div></div>
+          <div class="widget"><div class="widget-t"></div><div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:2px"><div style="height:7px;width:22px;background:rgba(255,255,255,.08);border-radius:20px"></div><div style="height:7px;width:28px;background:rgba(255,255,255,.08);border-radius:20px"></div><div style="height:7px;width:18px;background:rgba(255,255,255,.08);border-radius:20px"></div></div></div>
+          <div class="widget"><div class="widget-t"></div><div style="height:14px;background:rgba(255,211,42,.1);border-radius:2px"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ OPTION B: wide sidebar ══ -->
+  <div class="opt" data-choice="b" onclick="toggleSelect(this)">
+    <div class="opt-head">
+      <div class="letter">B</div>
+      <div>
+        <div class="opt-title">两栏 · 宽侧边栏 <span class="badge rec">推荐</span></div>
+        <div class="opt-desc">Feed 加宽，侧边栏扩到 340px 并填入更多内容：价格快照（BTC/ETH/SOL）+ 恐惧贪婪指数 + 订阅 + 标签。空白感消失，整体比例更舒服。</div>
+      </div>
+    </div>
+    <div class="wf">
+      <div class="mock-nav"><div class="mock-logo"></div><div class="mock-pills"><div class="pill" style="width:24px"></div><div class="pill" style="width:32px"></div><div class="pill" style="width:28px"></div><div class="pill" style="width:24px"></div></div><div class="pill" style="width:40px"></div></div>
+      <div class="mock-hero"><div class="hero-left"><div class="h-score"></div><div class="h-text w80"></div><div class="h-text w60"></div></div><div class="hero-right"><div class="h-btc"></div><div class="h-chart"></div></div></div>
+      <div class="two-col-wide">
+        <div class="feed-col">
+          <div class="col-label">Feed</div>
+          <div class="feed-row"><div class="feed-num"></div><div class="feed-lines"><div class="row-line accent"></div><div class="row-line short"></div><div class="row-line xshort"></div></div></div>
+          <div class="feed-row"><div class="feed-num"></div><div class="feed-lines"><div class="row-line orange"></div><div class="row-line short"></div><div class="row-line xshort"></div></div></div>
+          <div class="feed-row"><div class="feed-num"></div><div class="feed-lines"><div class="row-line purple"></div><div class="row-line short"></div></div></div>
+        </div>
+        <div class="sidebar-col">
+          <div class="sb-widget">
+            <div class="col-label">Price Snapshot</div>
+            <div class="mini-stat"><div class="ms-l"></div><div class="ms-r"></div></div>
+            <div class="mini-stat" style="margin-top:4px"><div class="ms-l"></div><div class="ms-rr"></div></div>
+            <div class="mini-stat" style="margin-top:4px"><div class="ms-l"></div><div class="ms-r"></div></div>
+          </div>
+          <div class="sb-widget">
+            <div class="col-label">Fear &amp; Greed</div>
+            <div style="height:16px;background:rgba(0,200,150,.12);border-radius:3px;position:relative;overflow:hidden"><div style="position:absolute;left:0;top:0;bottom:0;width:72%;background:rgba(0,200,150,.3);border-radius:3px"></div></div>
+            <div style="font-size:.52rem;font-family:monospace;color:rgba(0,200,150,.6);margin-top:3px">72 · GREED</div>
+          </div>
+          <div class="sb-widget">
+            <div class="col-label">Subscribe</div>
+            <div style="height:10px;background:rgba(255,255,255,.06);border-radius:3px;margin-bottom:4px"></div>
+            <div style="height:10px;background:rgba(0,200,255,.2);border-radius:3px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ OPTION C: magazine ══ -->
+  <div class="opt" data-choice="c" onclick="toggleSelect(this)">
+    <div class="opt-head">
+      <div class="letter">C</div>
+      <div>
+        <div class="opt-title">杂志式 · 大特稿 + 三栏小 Feed</div>
+        <div class="opt-desc">Today's Top 变成"大图特稿 + 两篇小稿"左右分布；下方三等分 Feed 无侧边栏，整体更像媒体网站。订阅框移到 Hero 下方横幅。</div>
+      </div>
+    </div>
+    <div class="wf">
+      <div class="mock-nav"><div class="mock-logo"></div><div class="mock-pills"><div class="pill" style="width:24px"></div><div class="pill" style="width:32px"></div><div class="pill" style="width:28px"></div><div class="pill" style="width:24px"></div></div><div class="pill" style="width:40px"></div></div>
+      <div class="mock-hero"><div class="hero-left"><div class="h-score"></div><div class="h-text w80"></div><div class="h-text w60"></div></div><div class="hero-right"><div class="h-btc"></div><div class="h-chart"></div></div></div>
+      <!-- subscribe banner -->
+      <div style="height:18px;background:rgba(0,200,255,.06);border-radius:5px;margin-bottom:.4rem;display:flex;align-items:center;padding:0 .6rem;gap:.4rem;border:1px solid rgba(0,200,255,.1)">
+        <div style="height:5px;flex:1;background:rgba(255,255,255,.06);border-radius:1px"></div>
+        <div style="height:8px;width:48px;background:rgba(0,200,255,.2);border-radius:2px"></div>
+      </div>
+      <!-- mag top -->
+      <div class="mag-top">
+        <div class="mag-featured">
+          <div class="strip strip-green" style="margin:-0.3rem -0.4rem 0.3rem;border-radius:0"></div>
+          <div class="row-line accent" style="height:8px;margin-bottom:.3rem"></div>
+          <div class="row-line w80" style="height:5px;margin-bottom:.2rem"></div>
+          <div class="row-line w60" style="height:5px"></div>
+        </div>
+        <div class="mag-stack">
+          <div class="mag-small"><div class="strip strip-orange" style="margin:-0.3rem -0.4rem 0.25rem;border-radius:0"></div><div class="row-line orange" style="height:6px;margin-bottom:.2rem"></div><div class="row-line xshort" style="height:4px"></div></div>
+          <div class="mag-small"><div class="strip strip-purple" style="margin:-0.3rem -0.4rem 0.25rem;border-radius:0"></div><div class="row-line purple" style="height:6px;margin-bottom:.2rem"></div><div class="row-line xshort" style="height:4px"></div></div>
+        </div>
+      </div>
+      <!-- full-width 3-col feed -->
+      <div class="full-feed">
+        <div class="ff-card"><div class="row-line accent"></div><div class="row-line short"></div><div class="row-line xshort"></div></div>
+        <div class="ff-card"><div class="row-line orange"></div><div class="row-line short"></div><div class="row-line xshort"></div></div>
+        <div class="ff-card"><div class="row-line purple"></div><div class="row-line short"></div><div class="row-line xshort"></div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function toggleSelect(el) {
+  document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  const choice = el.dataset.choice;
+  if (window.parent) window.parent.postMessage({ type: 'choice', choice, text: el.querySelector('.opt-title').textContent }, '*');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoLens — Layout Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0e1a;color:#e0e6f0;font-family:'Space Grotesk',system-ui,sans-serif;font-size:14px;line-height:1.5}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* ── NAV ── */
+.nav{display:flex;align-items:center;gap:1rem;padding:0 1.5rem;height:52px;border-bottom:1px solid rgba(255,255,255,0.06);position:sticky;top:0;z-index:10;background:rgba(10,14,26,0.95);backdrop-filter:blur(12px)}
+.nav-logo{font-family:'JetBrains Mono',monospace;font-size:1.05rem;font-weight:700;letter-spacing:0.06em;color:#fff}
+.nav-logo span{color:#00c8ff}
+.nav-filters{display:flex;gap:0.25rem;flex:1;justify-content:center}
+.nf{background:none;border:none;color:rgba(255,255,255,0.35);font-family:'JetBrains Mono',monospace;font-size:0.68rem;font-weight:700;letter-spacing:0.08em;padding:0.3rem 0.65rem;border-radius:4px;cursor:pointer;transition:all 0.15s}
+.nf:hover{color:rgba(255,255,255,0.7)}
+.nf.active{background:rgba(255,255,255,0.08);color:#fff}
+.nav-right{display:flex;align-items:center;gap:0.6rem}
+.btn-sm{font-size:0.7rem;font-weight:600;padding:0.3rem 0.8rem;border-radius:5px;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;letter-spacing:0.02em}
+.btn-ghost{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.6)}
+.btn-primary{background:#00c8ff;color:#000}
+
+/* ── HERO ── */
+.hero{padding:1.6rem 1.5rem 1.2rem;border-bottom:1px solid rgba(255,255,255,0.06);position:relative;overflow:hidden}
+.hero-glow{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,200,150,0.12) 0%,transparent 100%);pointer-events:none;transition:background 0.6s}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;position:relative;z-index:1;max-width:1100px;margin:0 auto}
+.hero-label{font-family:'JetBrains Mono',monospace;font-size:0.6rem;letter-spacing:0.12em;color:rgba(255,255,255,0.3);text-transform:uppercase;margin-bottom:0.7rem;display:flex;align-items:center;gap:0.6rem}
+.hero-label-dot{width:6px;height:6px;border-radius:50%;background:#00c896}
+
+/* left panel */
+.sentiment-score-row{display:flex;align-items:baseline;gap:0.7rem;margin-bottom:0.5rem}
+.big-mood{font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;color:#00c896;letter-spacing:0.02em}
+.big-num{font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:700;color:#00c896;opacity:0.8}
+.hero-summary{font-size:0.78rem;color:rgba(255,255,255,0.5);line-height:1.55;margin-bottom:0.8rem}
+.theme-tags{display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.9rem}
+.tag{font-size:0.6rem;font-family:'JetBrains Mono',monospace;padding:3px 8px;border-radius:3px;background:rgba(0,200,150,0.1);color:#00c896;font-weight:600;letter-spacing:0.04em}
+.mini-bars{display:flex;align-items:flex-end;gap:3px;height:36px}
+.mb{flex:1;border-radius:2px 2px 0 0;min-height:3px}
+.mini-bars-label{font-size:0.55rem;color:rgba(255,255,255,0.18);font-family:monospace;margin-top:3px;display:flex;justify-content:space-between}
+
+/* right panel */
+.btc-panel{border-left:1px solid rgba(255,255,255,0.06);padding-left:2rem}
+.btc-price-row{display:flex;align-items:baseline;gap:0.7rem;margin-bottom:0.2rem}
+.btc-price{font-family:'JetBrains Mono',monospace;font-size:1.7rem;font-weight:700;color:#fff}
+.btc-change-up{color:#00c896;font-family:'JetBrains Mono',monospace;font-size:0.82rem}
+.live-badge{display:flex;align-items:center;gap:0.3rem;font-size:0.58rem;font-family:monospace;color:rgba(255,255,255,0.25);margin-bottom:0.8rem}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#00c896;animation:pulse 1.2s ease-in-out infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(0.6)}}
+
+/* svg chart area */
+.chart-area{position:relative}
+.chart-svg{width:100%;height:90px;display:block}
+
+/* divider line in middle of chart = sentiment baseline */
+.sent-band{height:6px;border-radius:3px;margin-top:0.5rem;display:flex;gap:2px}
+.sb{flex:1;border-radius:2px}
+.chart-footer{display:flex;justify-content:space-between;margin-top:4px}
+.chart-footer span{font-size:0.55rem;color:rgba(255,255,255,0.18);font-family:monospace}
+
+/* ── CONTENT AREA ── */
+.content{max-width:1100px;margin:0 auto;padding:1.2rem 1.5rem}
+.top-section{margin-bottom:1.4rem}
+.section-label{font-family:'JetBrains Mono',monospace;font-size:0.62rem;letter-spacing:0.1em;color:rgba(255,255,255,0.3);text-transform:uppercase;margin-bottom:0.8rem}
+.top-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.9rem}
+.top-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:0.9rem;cursor:pointer;transition:border-color 0.15s}
+.top-card:hover{border-color:rgba(255,255,255,0.14)}
+.tc-cat{font-size:0.58rem;font-family:monospace;padding:2px 7px;border-radius:2px;font-weight:600;letter-spacing:0.04em;display:inline-block;margin-bottom:0.5rem}
+.cat-cross{background:rgba(162,155,254,0.15);color:#a29bfe}
+.cat-crypto{background:rgba(0,200,150,0.12);color:#00c896}
+.cat-ai{background:rgba(0,200,255,0.12);color:#00c8ff}
+.tc-title{font-size:0.82rem;font-weight:600;line-height:1.35;margin-bottom:0.35rem;color:#fff}
+.tc-src{font-size:0.65rem;color:rgba(255,255,255,0.28)}
+
+/* main grid */
+.main-grid{display:grid;grid-template-columns:1fr 280px;gap:1.5rem}
+.feed-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:0.9rem 1rem;margin-bottom:0.7rem;display:flex;gap:0.9rem;cursor:pointer;transition:border-color 0.15s}
+.feed-card:hover{border-color:rgba(255,255,255,0.12)}
+.fc-imp{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;min-width:28px;color:rgba(255,255,255,0.7)}
+.fc-body{flex:1}
+.fc-title{font-size:0.84rem;font-weight:600;color:#fff;margin-bottom:0.25rem;line-height:1.35}
+.fc-summary{font-size:0.72rem;color:rgba(255,255,255,0.42);line-height:1.45;margin-bottom:0.35rem}
+.fc-meta{display:flex;align-items:center;gap:0.5rem}
+.fc-src{font-size:0.62rem;color:rgba(255,255,255,0.25)}
+.fc-time{font-size:0.6rem;color:rgba(255,255,255,0.18);font-family:monospace}
+
+.sidebar{display:flex;flex-direction:column;gap:0.9rem}
+.sb-block{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:0.9rem}
+.sb-title{font-family:'JetBrains Mono',monospace;font-size:0.62rem;letter-spacing:0.1em;color:rgba(255,255,255,0.3);text-transform:uppercase;margin-bottom:0.7rem}
+.sb-email{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:5px;padding:0.45rem 0.7rem;color:#fff;font-size:0.78rem;font-family:'Space Grotesk',sans-serif;outline:none;margin-bottom:0.5rem}
+.sb-btn{width:100%;background:#00c8ff;color:#000;border:none;border-radius:5px;padding:0.45rem;font-size:0.75rem;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif}
+.tags-wrap{display:flex;flex-wrap:wrap;gap:0.4rem}
+.tag-pill{font-size:0.65rem;font-family:monospace;padding:3px 9px;border-radius:20px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.45);cursor:pointer;transition:all 0.15s}
+.tag-pill:hover{background:rgba(255,255,255,0.1);color:#fff}
+
+/* annotation callouts */
+.callout{position:absolute;background:rgba(99,179,237,0.12);border:1px solid rgba(99,179,237,0.35);border-radius:6px;padding:4px 8px;font-size:0.62rem;color:#63b3ed;font-family:monospace;white-space:nowrap;pointer-events:none;z-index:20}
+.callout-line{position:absolute;border-left:1px dashed rgba(99,179,237,0.35);pointer-events:none;z-index:19}
+
+.label-strip{display:flex;align-items:center;gap:0.5rem;margin-bottom:1.2rem;padding-bottom:0.8rem;border-bottom:1px solid rgba(255,255,255,0.06)}
+.ls-item{font-size:0.7rem;color:rgba(255,255,255,0.5);display:flex;align-items:center;gap:0.35rem}
+.ls-dot{width:8px;height:8px;border-radius:50%}
+.ls-sep{color:rgba(255,255,255,0.12);margin:0 0.2rem}
+</style>
+</head>
+<body>
+
+<!-- header banner -->
+<div style="background:rgba(99,179,237,0.08);border-bottom:1px solid rgba(99,179,237,0.15);padding:0.5rem 1.5rem;font-size:0.72rem;color:rgba(99,179,237,0.8);text-align:center;font-family:monospace">
+  设计预览 · 点击右上角 ✓ 确认方向 · 非真实数据
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <span class="nav-logo mono">CRYPTO<span>LENS</span></span>
+  <div class="nav-filters">
+    <button class="nf active">ALL</button>
+    <button class="nf">CROSS</button>
+    <button class="nf">CRYPTO</button>
+    <button class="nf">AI</button>
+    <button class="nf">REGULATION</button>
+    <button class="nf">ON-CHAIN</button>
+  </div>
+  <div class="nav-right">
+    <button class="btn-sm btn-ghost">Sign In</button>
+    <button class="btn-sm btn-primary">Subscribe</button>
+  </div>
+</nav>
+
+<!-- HERO: Layout C + WebSocket BTC -->
+<div class="hero" id="hero-block">
+  <div class="hero-glow" id="hero-glow"></div>
+  <div class="hero-grid">
+
+    <!-- LEFT: Sentiment -->
+    <div>
+      <div class="hero-label">
+        <div class="hero-label-dot"></div>
+        MARKET PULSE · 47 SIGNALS · 2H AGO
+      </div>
+      <div class="sentiment-score-row">
+        <span class="big-mood" id="mood-word">BULLISH</span>
+        <span class="big-num" id="mood-score">+68</span>
+      </div>
+      <p class="hero-summary">BTC consolidates above $103k as ETF inflows remain strong. Altcoin rotation signals building. Regulatory clarity in EU boosts institutional confidence.</p>
+      <div class="theme-tags">
+        <span class="tag">ETF FLOWS</span>
+        <span class="tag">BTC DOMINANCE</span>
+        <span class="tag">EU REGULATION</span>
+        <span class="tag">ALTSEASON</span>
+      </div>
+
+      <!-- 14-day mini bar chart -->
+      <div>
+        <div style="font-size:0.55rem;color:rgba(255,255,255,0.2);font-family:monospace;margin-bottom:4px;letter-spacing:0.06em">14-DAY HISTORY</div>
+        <div class="mini-bars" id="mini-bars">
+          <div class="mb" style="height:45%;background:#ff4757;opacity:0.65"></div>
+          <div class="mb" style="height:20%;background:#ffd32a;opacity:0.5"></div>
+          <div class="mb" style="height:30%;background:#ffd32a;opacity:0.65"></div>
+          <div class="mb" style="height:55%;background:#00c896;opacity:0.55"></div>
+          <div class="mb" style="height:25%;background:#ff4757;opacity:0.5"></div>
+          <div class="mb" style="height:15%;background:#ffd32a;opacity:0.45"></div>
+          <div class="mb" style="height:60%;background:#00c896;opacity:0.65"></div>
+          <div class="mb" style="height:70%;background:#00c896;opacity:0.75"></div>
+          <div class="mb" style="height:40%;background:#ff4757;opacity:0.45"></div>
+          <div class="mb" style="height:65%;background:#00c896;opacity:0.7"></div>
+          <div class="mb" style="height:75%;background:#00c896;opacity:0.8"></div>
+          <div class="mb" style="height:80%;background:#00c896;opacity:0.85"></div>
+          <div class="mb" style="height:90%;background:#00c896;opacity:0.9"></div>
+          <div class="mb" style="height:100%;background:#00c896;opacity:1;box-shadow:0 0 8px rgba(0,200,150,0.5)"></div>
+        </div>
+        <div class="mini-bars-label"><span>May 4</span><span>Today</span></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: BTC WebSocket price + hourly chart -->
+    <div class="btc-panel">
+      <div class="hero-label">
+        <div class="live-dot"></div>
+        BTC/USD · BINANCE · WEBSOCKET
+      </div>
+      <div class="btc-price-row">
+        <span class="btc-price" id="btc-price">$103,420</span>
+        <span class="btc-change-up">▲ +2.34%</span>
+      </div>
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        LIVE · 上次跳动 0.3s 前
+        <span style="margin-left:auto;color:rgba(255,255,255,0.15)">24h 低: $100,812 · 高: $104,233</span>
+      </div>
+
+      <!-- 24h hourly chart SVG -->
+      <div class="chart-area">
+        <svg class="chart-svg" viewBox="0 0 360 90" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f7931a" stop-opacity="0.2"/>
+              <stop offset="100%" stop-color="#f7931a" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- grid lines -->
+          <line x1="0" y1="22" x2="360" y2="22" stroke="rgba(255,255,255,0.04)" stroke-dasharray="4,3"/>
+          <line x1="0" y1="55" x2="360" y2="55" stroke="rgba(255,255,255,0.04)" stroke-dasharray="4,3"/>
+          <!-- fill area -->
+          <path d="M0,72 L15,68 L30,74 L45,65 L60,60 L75,57 L90,62 L105,55 L120,50 L135,45 L150,48 L165,40 L180,35 L195,32 L210,38 L225,28 L240,24 L255,30 L270,20 L285,18 L300,25 L315,15 L330,18 L345,12 L360,8 L360,90 L0,90 Z" fill="url(#g1)"/>
+          <!-- price line -->
+          <path d="M0,72 L15,68 L30,74 L45,65 L60,60 L75,57 L90,62 L105,55 L120,50 L135,45 L150,48 L165,40 L180,35 L195,32 L210,38 L225,28 L240,24 L255,30 L270,20 L285,18 L300,25 L315,15 L330,18 L345,12 L360,8" fill="none" stroke="#f7931a" stroke-width="1.8" stroke-linejoin="round"/>
+          <!-- latest price dot -->
+          <circle cx="360" cy="8" r="4" fill="#f7931a" stroke="rgba(0,0,0,0.5)" stroke-width="1.5"/>
+          <circle cx="360" cy="8" r="8" fill="none" stroke="#f7931a" stroke-width="1" opacity="0.3"/>
+          <!-- price labels -->
+          <text x="354" y="6" font-size="7" fill="rgba(247,147,26,0.7)" font-family="monospace" text-anchor="end">$104.2k</text>
+          <text x="354" y="87" font-size="7" fill="rgba(247,147,26,0.5)" font-family="monospace" text-anchor="end">$100.8k</text>
+        </svg>
+
+        <!-- sentiment color band under chart — aligns with hours -->
+        <div class="sent-band">
+          <div class="sb" style="background:#ffd32a;opacity:0.5"></div>
+          <div class="sb" style="background:#ffd32a;opacity:0.45"></div>
+          <div class="sb" style="background:#00c896;opacity:0.5"></div>
+          <div class="sb" style="background:#00c896;opacity:0.6"></div>
+          <div class="sb" style="background:#00c896;opacity:0.65"></div>
+          <div class="sb" style="background:#00c896;opacity:0.7"></div>
+          <div class="sb" style="background:#00c896;opacity:0.75"></div>
+          <div class="sb" style="background:#00c896;opacity:0.8"></div>
+          <div class="sb" style="background:#00c896;opacity:0.75"></div>
+          <div class="sb" style="background:#ff4757;opacity:0.4"></div>
+          <div class="sb" style="background:#ff4757;opacity:0.5"></div>
+          <div class="sb" style="background:#ffd32a;opacity:0.45"></div>
+          <div class="sb" style="background:#00c896;opacity:0.7"></div>
+          <div class="sb" style="background:#00c896;opacity:0.85"></div>
+          <div class="sb" style="background:#00c896;opacity:0.9"></div>
+        </div>
+
+        <div class="chart-footer">
+          <span>00:00</span>
+          <span style="color:rgba(255,255,255,0.12)">▓ sentiment color band</span>
+          <span>now</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="content">
+
+  <!-- Today's Top -->
+  <div class="top-section">
+    <div class="section-label">Today's Top Signals</div>
+    <div class="top-grid">
+      <div class="top-card">
+        <span class="tc-cat cat-cross">CROSS</span>
+        <div class="tc-title">BlackRock ETF hits $2.1B single-day inflow record as BTC reclaims $103k</div>
+        <div class="tc-src">The Block · 1h ago · ★ 9.2</div>
+      </div>
+      <div class="top-card">
+        <span class="tc-cat cat-ai">AI × CRYPTO</span>
+        <div class="tc-title">Coinbase integrates Claude for on-chain transaction explanations</div>
+        <div class="tc-src">Decrypt · 3h ago · ★ 8.7</div>
+      </div>
+      <div class="top-card">
+        <span class="tc-cat cat-crypto">CRYPTO</span>
+        <div class="tc-title">EU MiCA enforcement begins: three exchanges receive compliance notices</div>
+        <div class="tc-src">CoinTelegraph · 5h ago · ★ 8.4</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feed + Sidebar -->
+  <div class="main-grid">
+    <main>
+      <div class="feed-card">
+        <span class="fc-imp mono">9.2</span>
+        <div class="fc-body">
+          <div class="fc-title">BlackRock IBIT sees record $2.1B single-day inflow as BTC breaks out</div>
+          <div class="fc-summary">Institutional demand accelerating. Analysts see $120k as next resistance if flows sustain through the week.</div>
+          <div class="fc-meta"><span class="tc-cat cat-cross" style="font-size:0.55rem;margin:0">CROSS</span><span class="fc-src">The Block</span><span class="fc-time">1h</span></div>
+        </div>
+      </div>
+      <div class="feed-card">
+        <span class="fc-imp mono">8.7</span>
+        <div class="fc-body">
+          <div class="fc-title">Coinbase integrates Claude for on-chain transaction explanations</div>
+          <div class="fc-summary">Users can now ask natural language questions about their wallet activity. Powered by Anthropic's Claude API.</div>
+          <div class="fc-meta"><span class="tc-cat cat-ai" style="font-size:0.55rem;margin:0">AI</span><span class="fc-src">Decrypt</span><span class="fc-time">3h</span></div>
+        </div>
+      </div>
+      <div class="feed-card">
+        <span class="fc-imp mono">8.1</span>
+        <div class="fc-body">
+          <div class="fc-title">Ethereum L2 transaction volume surpasses Ethereum mainnet for 30th consecutive day</div>
+          <div class="fc-summary">Base and Arbitrum account for 67% of combined L1+L2 volume. Gas fees on mainnet remain elevated.</div>
+          <div class="fc-meta"><span class="tc-cat cat-crypto" style="font-size:0.55rem;margin:0">CRYPTO</span><span class="fc-src">Blockworks</span><span class="fc-time">5h</span></div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="sidebar">
+      <div class="sb-block">
+        <div class="sb-title">Free Weekly Signal</div>
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.4);margin-bottom:0.6rem">Top 10 stories every Monday.</p>
+        <input class="sb-email" placeholder="your@email.com">
+        <button class="sb-btn">Subscribe Free</button>
+      </div>
+      <div class="sb-block">
+        <div class="sb-title">Trending Tags</div>
+        <div class="tags-wrap">
+          <span class="tag-pill">ETF</span><span class="tag-pill">BlackRock</span><span class="tag-pill">MiCA</span><span class="tag-pill">Base</span><span class="tag-pill">Claude</span><span class="tag-pill">L2</span><span class="tag-pill">Altseason</span>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- Selection overlay -->
+<div style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:100">
+  <button onclick="confirmDesign()" style="background:#00c896;color:#000;border:none;border-radius:8px;padding:0.6rem 1.4rem;font-weight:700;font-size:0.82rem;cursor:pointer;font-family:'Space Grotesk',sans-serif;box-shadow:0 4px 20px rgba(0,200,150,0.35)">
+    ✓ 确认这个方向
+  </button>
+</div>
+
+<script>
+// Animate live price
+const prices = [103420, 103418, 103425, 103431, 103428, 103435, 103441, 103438, 103445, 103449];
+let pi = 0;
+function tick() {
+  pi = (pi + 1) % prices.length;
+  const p = prices[pi];
+  const el = document.getElementById('btc-price');
+  if (el) {
+    el.textContent = '$' + p.toLocaleString('en');
+    el.style.color = '#fff';
+    el.style.textShadow = '0 0 8px rgba(247,147,26,0.4)';
+    setTimeout(() => { el.style.textShadow = 'none'; }, 300);
+  }
+}
+setInterval(tick, 1800);
+
+// Sentiment toggle demo
+const moods = [
+  { word: 'BULLISH', score: '+68', color: '#00c896', glow: 'rgba(0,200,150,0.12)' },
+  { word: 'BEARISH', score: '-42', color: '#ff4757', glow: 'rgba(255,71,87,0.12)' },
+  { word: 'NEUTRAL', score: '+8',  color: '#ffd32a', glow: 'rgba(255,211,42,0.10)' },
+];
+let mi = 0;
+document.getElementById('hero-block').addEventListener('click', e => {
+  if (e.target.closest('button')) return;
+  mi = (mi + 1) % moods.length;
+  const m = moods[mi];
+  document.getElementById('mood-word').textContent = m.word;
+  document.getElementById('mood-word').style.color = m.color;
+  document.getElementById('mood-score').textContent = m.score;
+  document.getElementById('mood-score').style.color = m.color;
+  document.getElementById('hero-glow').style.background = `linear-gradient(to bottom,${m.glow} 0%,transparent 100%)`;
+});
+
+function confirmDesign() {
+  if (window.parent && window.parent.postMessage) {
+    window.parent.postMessage({ type: 'choice', choice: 'confirmed', text: 'Layout C + WebSocket confirmed' }, '*');
+  }
+  document.querySelector('button[onclick="confirmDesign()"]').textContent = '✓ 已确认！';
+}
+</script>
+</body>
+</html>

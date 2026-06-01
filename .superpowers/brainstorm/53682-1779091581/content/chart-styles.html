@@ -1,0 +1,238 @@
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0a0e1a; color: #e0e6f0; font-family: 'Space Grotesk', system-ui, sans-serif; }
+
+  .q-title { font-size: 1.1rem; font-weight: 600; color: #fff; margin-bottom: 0.3rem; }
+  .q-sub { font-size: 0.82rem; color: rgba(255,255,255,0.45); margin-bottom: 1.4rem; }
+
+  .cards { display: flex; flex-direction: column; gap: 1.2rem; }
+  .card { background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.08); border-radius: 12px; overflow: hidden; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; }
+  .card:hover { border-color: rgba(99,179,237,0.5); }
+  .card.selected { border-color: #63b3ed; box-shadow: 0 0 0 3px rgba(99,179,237,0.18); }
+  .card-label { display: flex; align-items: center; gap: 0.7rem; padding: 0.8rem 1rem 0.5rem; }
+  .card-letter { width: 26px; height: 26px; border-radius: 50%; background: rgba(99,179,237,0.15); border: 1.5px solid rgba(99,179,237,0.4); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: #63b3ed; flex-shrink: 0; }
+  .card-name { font-weight: 600; font-size: 0.92rem; }
+  .card-desc { font-size: 0.78rem; color: rgba(255,255,255,0.45); }
+  .card-preview { padding: 0 1rem 1rem; }
+
+  /* ── mock CryptoLens UI pieces ── */
+  .mock-hero { background: #0d1120; border-radius: 8px; padding: 1rem; }
+  .mono { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+  .tag-label { font-size: 0.62rem; letter-spacing: 0.1em; color: rgba(255,255,255,0.35); font-family: monospace; text-transform: uppercase; }
+
+  /* sentiment bar chart (current) */
+  .chart-daily { display: flex; align-items: flex-end; gap: 4px; height: 64px; padding: 0 2px; }
+  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; }
+  .bar { border-radius: 3px 3px 0 0; min-height: 4px; width: 100%; }
+  .bar-lbl { font-size: 0.52rem; color: rgba(255,255,255,0.25); margin-top: 3px; font-family: monospace; }
+
+  /* hourly chart */
+  .chart-hourly-wrap { position: relative; height: 80px; }
+  .price-label { font-size: 0.62rem; color: rgba(247,147,26,0.7); font-family: monospace; }
+
+  /* gauge */
+  .gauge-wrap { display: flex; align-items: center; gap: 1.2rem; }
+  .gauge-svg { flex-shrink: 0; }
+  .gauge-info { flex: 1; }
+  .big-score { font-size: 2.6rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; line-height: 1; }
+  .sentiment-word { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; font-family: monospace; margin-top: 0.25rem; }
+
+  /* heatmap */
+  .heatmap-row { display: flex; gap: 3px; margin-bottom: 3px; }
+  .hm-cell { width: 18px; height: 18px; border-radius: 3px; }
+
+  /* inline BTC sparkline */
+  .ticker-row { display: flex; align-items: center; gap: 0.8rem; margin-top: 0.6rem; padding-top: 0.6rem; border-top: 1px solid rgba(255,255,255,0.06); }
+  .btc-big { font-size: 0.95rem; font-weight: 700; font-family: monospace; }
+  .chg-up { color: #00c896; font-size: 0.78rem; font-family: monospace; }
+  .chg-dn { color: #ff4757; font-size: 0.78rem; font-family: monospace; }
+  .spark-svg { flex: 1; }
+</style>
+
+<p class="q-title">图表 & 情绪可视化 — 选择方向</p>
+<p class="q-sub">三个不同方案，各有侧重。点击选择你喜欢的方向。</p>
+
+<div class="cards">
+
+  <!-- ══ OPTION A ══ -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-label">
+      <div class="card-letter">A</div>
+      <div>
+        <div class="card-name">小时级 BTC + 情绪双轨图</div>
+        <div class="card-desc">24h 小时蜡烛 / 折线，情绪评分叠加在下方。实时感最强。</div>
+      </div>
+    </div>
+    <div class="card-preview">
+      <div class="mock-hero">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.6rem">
+          <span class="tag-label">MARKET PULSE · LIVE</span>
+          <span style="font-size:0.65rem;color:rgba(255,255,255,0.25);font-family:monospace">updated 4m ago</span>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:0.7rem;margin-bottom:0.5rem">
+          <span class="big-score" style="font-size:1.8rem;color:#00c896">BULLISH</span>
+          <span style="font-size:1.1rem;font-weight:700;color:#00c896;font-family:monospace">+68</span>
+          <span style="margin-left:auto;font-size:0.82rem;font-weight:700;font-family:monospace;color:#fff">$103,420</span>
+          <span class="chg-up">▲ +2.3%</span>
+        </div>
+        <!-- 24h hourly BTC price line (SVG) + sentiment color band -->
+        <svg viewBox="0 0 320 70" style="width:100%;height:70px;display:block" preserveAspectRatio="none">
+          <!-- sentiment band underneath -->
+          <rect x="0" y="0" width="320" height="70" fill="rgba(0,200,150,0.04)" rx="4"/>
+          <!-- price range guide -->
+          <line x1="0" y1="14" x2="320" y2="14" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4,3"/>
+          <line x1="0" y1="42" x2="320" y2="42" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4,3"/>
+          <!-- BTC price line (24 hourly points, simulated) -->
+          <polyline points="0,42 13,40 27,44 40,38 53,35 67,33 80,36 93,30 107,28 120,25 133,22 147,26 160,20 173,18 187,22 200,17 213,15 227,19 240,14 253,12 267,16 280,11 293,13 307,10 320,8" fill="none" stroke="#f7931a" stroke-width="1.8" stroke-linejoin="round"/>
+          <!-- sentiment color dots at bottom -->
+          <rect x="0"   y="60" width="13" height="6" fill="#ffd32a" rx="1" opacity="0.6"/>
+          <rect x="14"  y="60" width="13" height="6" fill="#ffd32a" rx="1" opacity="0.6"/>
+          <rect x="28"  y="60" width="13" height="6" fill="#00c896" rx="1" opacity="0.6"/>
+          <rect x="42"  y="60" width="13" height="6" fill="#00c896" rx="1" opacity="0.8"/>
+          <rect x="56"  y="60" width="13" height="6" fill="#00c896" rx="1" opacity="0.9"/>
+          <rect x="70"  y="60" width="13" height="6" fill="#00c896" rx="1" opacity="0.9"/>
+          <rect x="84"  y="60" width="13" height="6" fill="#00c896" rx="1" opacity="1"/>
+          <rect x="98"  y="60" width="13" height="6" fill="#00c896" rx="1" opacity="1"/>
+          <rect x="112" y="60" width="13" height="6" fill="#00c896" rx="1" opacity="1"/>
+          <rect x="126" y="60" width="13" height="6" fill="#00c896" rx="1" opacity="1"/>
+          <rect x="140" y="60" width="13" height="6" fill="#00c896" rx="1" opacity="1"/>
+          <rect x="154" y="60" width="13" height="6" fill="#00c896" rx="1" opacity="1"/>
+          <!-- axis labels -->
+          <text x="0" y="68" font-size="6" fill="rgba(255,255,255,0.2)" font-family="monospace">00:00</text>
+          <text x="148" y="68" font-size="6" fill="rgba(255,255,255,0.2)" font-family="monospace">12:00</text>
+          <text x="305" y="68" font-size="6" fill="rgba(255,255,255,0.2)" font-family="monospace">now</text>
+          <text x="305" y="11" font-size="7" fill="rgba(247,147,26,0.6)" font-family="monospace" text-anchor="end">104k</text>
+        </svg>
+        <p style="font-size:0.72rem;color:rgba(255,255,255,0.5);margin-top:0.5rem;line-height:1.4">BTC breaks $103k amid strong ETF inflows. Market sentiment remains elevated as institutional demand absorbs selling pressure.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ OPTION B ══ -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-label">
+      <div class="card-letter">B</div>
+      <div>
+        <div class="card-name">情绪仪表盘 + 14日历史热图</div>
+        <div class="card-desc">大号仪表盘展示当前情绪，下方日历格子热图看历史分布。直观清晰。</div>
+      </div>
+    </div>
+    <div class="card-preview">
+      <div class="mock-hero">
+        <div class="tag-label" style="margin-bottom:0.7rem">MARKET PULSE · 2h AGO · 47 SIGNALS</div>
+        <div class="gauge-wrap">
+          <!-- SVG gauge -->
+          <svg class="gauge-svg" viewBox="0 0 110 70" width="110" height="70">
+            <!-- track -->
+            <path d="M 10 60 A 50 50 0 0 1 100 60" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="9" stroke-linecap="round"/>
+            <!-- fill (68% bullish) -->
+            <path d="M 10 60 A 50 50 0 0 1 85 22" fill="none" stroke="#00c896" stroke-width="9" stroke-linecap="round"/>
+            <!-- needle dot -->
+            <circle cx="85" cy="22" r="5" fill="#00c896" opacity="0.9"/>
+            <text x="55" y="56" text-anchor="middle" font-size="18" font-weight="700" fill="#00c896" font-family="monospace">+68</text>
+            <text x="55" y="67" text-anchor="middle" font-size="6.5" fill="rgba(255,255,255,0.35)" font-family="monospace">BULLISH</text>
+            <text x="9" y="68" font-size="6" fill="rgba(255,71,87,0.5)" font-family="monospace">-100</text>
+            <text x="93" y="68" font-size="6" fill="rgba(0,200,150,0.5)" font-family="monospace">+100</text>
+          </svg>
+          <div class="gauge-info">
+            <p style="font-size:0.72rem;color:rgba(255,255,255,0.5);line-height:1.45">BTC breaks $103k amid strong ETF inflows. Institutional demand absorbs selling pressure.</p>
+            <div class="ticker-row">
+              <span class="btc-big">$103,420</span>
+              <span class="chg-up">▲ +2.3% 24h</span>
+            </div>
+          </div>
+        </div>
+        <!-- 14-day heatmap -->
+        <div style="margin-top:0.8rem">
+          <div class="tag-label" style="margin-bottom:0.4rem">14-DAY SENTIMENT HISTORY</div>
+          <div class="heatmap-row">
+            <div class="hm-cell" style="background:#ff4757;opacity:0.7" title="-42 Bearish"></div>
+            <div class="hm-cell" style="background:#ffd32a;opacity:0.5" title="-8 Neutral"></div>
+            <div class="hm-cell" style="background:#ffd32a;opacity:0.7" title="+12 Neutral"></div>
+            <div class="hm-cell" style="background:#00c896;opacity:0.4" title="+28 Bullish"></div>
+            <div class="hm-cell" style="background:#ff4757;opacity:0.5" title="-20 Bearish"></div>
+            <div class="hm-cell" style="background:#ffd32a;opacity:0.5" title="+5 Neutral"></div>
+            <div class="hm-cell" style="background:#00c896;opacity:0.5" title="+38 Bullish"></div>
+            <div class="hm-cell" style="background:#00c896;opacity:0.6" title="+45 Bullish"></div>
+            <div class="hm-cell" style="background:#00c896;opacity:0.7" title="+52 Bullish"></div>
+            <div class="hm-cell" style="background:#ff4757;opacity:0.4" title="-15 Bearish"></div>
+            <div class="hm-cell" style="background:#00c896;opacity:0.5" title="+30 Bullish"></div>
+            <div class="hm-cell" style="background:#00c896;opacity:0.7" title="+55 Bullish"></div>
+            <div class="hm-cell" style="background:#00c896;opacity:0.9" title="+65 Bullish"></div>
+            <div class="hm-cell" style="background:#00c896;opacity:1" title="+68 Bullish"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:2px">
+            <span style="font-size:0.55rem;color:rgba(255,255,255,0.2);font-family:monospace">May 4</span>
+            <span style="font-size:0.55rem;color:rgba(255,255,255,0.2);font-family:monospace">Today</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ OPTION C ══ -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-label">
+      <div class="card-letter">C</div>
+      <div>
+        <div class="card-name">全宽双面板 Hero</div>
+        <div class="card-desc">左：情绪评分 + 摘要。右：BTC 实时折线图（30分钟刷新）。整体感更强。</div>
+      </div>
+    </div>
+    <div class="card-preview">
+      <div class="mock-hero">
+        <div class="tag-label" style="margin-bottom:0.6rem">MARKET PULSE</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <!-- left panel -->
+          <div style="border-right:1px solid rgba(255,255,255,0.06);padding-right:1rem">
+            <div style="display:flex;align-items:baseline;gap:0.5rem">
+              <span style="font-size:2rem;font-weight:700;color:#00c896;font-family:monospace">+68</span>
+              <span style="font-size:0.7rem;color:#00c896;font-family:monospace;letter-spacing:0.1em">BULLISH</span>
+            </div>
+            <p style="font-size:0.7rem;color:rgba(255,255,255,0.45);margin-top:0.4rem;line-height:1.45">BTC breaks $103k. ETF inflows dominate. Altcoin season signal strengthening.</p>
+            <div style="display:flex;gap:0.4rem;margin-top:0.5rem;flex-wrap:wrap">
+              <span style="font-size:0.58rem;padding:2px 6px;border-radius:3px;background:rgba(0,200,150,0.15);color:#00c896;font-family:monospace">ETF</span>
+              <span style="font-size:0.58rem;padding:2px 6px;border-radius:3px;background:rgba(0,200,150,0.15);color:#00c896;font-family:monospace">BTC</span>
+              <span style="font-size:0.58rem;padding:2px 6px;border-radius:3px;background:rgba(0,200,150,0.12);color:#00c896;font-family:monospace">ALTSEASON</span>
+            </div>
+            <!-- mini history bars -->
+            <div style="display:flex;align-items:flex-end;gap:3px;height:32px;margin-top:0.6rem">
+              <div style="flex:1;height:45%;background:#ff4757;border-radius:2px 2px 0 0;opacity:0.7"></div>
+              <div style="flex:1;height:20%;background:#ffd32a;border-radius:2px 2px 0 0;opacity:0.6"></div>
+              <div style="flex:1;height:30%;background:#ffd32a;border-radius:2px 2px 0 0;opacity:0.7"></div>
+              <div style="flex:1;height:55%;background:#00c896;border-radius:2px 2px 0 0;opacity:0.6"></div>
+              <div style="flex:1;height:35%;background:#ff4757;border-radius:2px 2px 0 0;opacity:0.5"></div>
+              <div style="flex:1;height:60%;background:#00c896;border-radius:2px 2px 0 0;opacity:0.7"></div>
+              <div style="flex:1;height:70%;background:#00c896;border-radius:2px 2px 0 0;opacity:0.8"></div>
+              <div style="flex:1;height:80%;background:#00c896;border-radius:2px 2px 0 0;opacity:0.9"></div>
+              <div style="flex:1;height:90%;background:#00c896;border-radius:2px 2px 0 0;opacity:1;box-shadow:0 0 6px rgba(0,200,150,0.5)"></div>
+            </div>
+            <div style="font-size:0.52rem;color:rgba(255,255,255,0.18);font-family:monospace;margin-top:2px">14d history</div>
+          </div>
+          <!-- right panel: BTC chart -->
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.3rem">
+              <span style="font-size:0.9rem;font-weight:700;font-family:monospace;color:#fff">$103,420</span>
+              <span class="chg-up" style="font-size:0.72rem">▲ +2.3%</span>
+            </div>
+            <svg viewBox="0 0 140 56" style="width:100%;height:56px;display:block" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="btcGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#f7931a" stop-opacity="0.25"/>
+                  <stop offset="100%" stop-color="#f7931a" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path d="M 0,42 8,40 16,44 24,38 32,35 40,33 48,30 56,28 64,25 72,22 80,26 88,20 96,17 104,15 112,11 120,14 128,10 136,8 140,7" fill="url(#btcGrad)" stroke="none"/>
+              <path d="M 0,42 8,40 16,44 24,38 32,35 40,33 48,30 56,28 64,25 72,22 80,26 88,20 96,17 104,15 112,11 120,14 128,10 136,8 140,7" fill="none" stroke="#f7931a" stroke-width="1.8" stroke-linejoin="round"/>
+              <line x1="0" y1="8" x2="140" y2="8" stroke="rgba(255,255,255,0.04)" stroke-dasharray="3,3"/>
+              <text x="0" y="54" font-size="6" fill="rgba(255,255,255,0.2)" font-family="monospace">24h</text>
+              <text x="135" y="10" font-size="6" fill="rgba(247,147,26,0.5)" font-family="monospace" text-anchor="end">ATH zone</text>
+            </svg>
+            <div style="font-size:0.6rem;color:rgba(255,255,255,0.2);font-family:monospace;margin-top:4px">47 signals · refreshed 4m ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
