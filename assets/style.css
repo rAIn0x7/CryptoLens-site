@@ -1189,23 +1189,22 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 .feed-error button{margin-left:.6rem;background:none;border:1px solid var(--cyan);color:var(--cyan);padding:.35rem .9rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:.8rem;transition:all .15s}
 .feed-error button:hover{background:var(--cyan);color:#000}
 
-/* ── DAILY BRIEF ── */
-.brief-section{padding:1.5rem 0 .5rem}
-.brief-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:1rem}
-.brief-kicker{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.18em;color:var(--cyan);text-transform:uppercase}
-.brief-date{font-family:var(--font-mono);font-size:.7rem;color:var(--muted)}
-.brief{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:2.5rem;background:var(--bg-card)}
-.brief-item{display:grid;grid-template-columns:auto 1fr;gap:1.1rem;padding:1.3rem 1.4rem;border-bottom:1px solid var(--border);transition:background .15s}
-.brief-item:last-child{border-bottom:none}
+/* ── DAILY BRIEF (compact 2-col) ── */
+.brief-section{padding:1.25rem 0 .25rem}
+.brief-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:.7rem}
+.brief-kicker{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.18em;color:var(--cyan);text-transform:uppercase}
+.brief-date{font-family:var(--font-mono);font-size:.68rem;color:var(--muted)}
+.brief{display:grid;grid-template-columns:1fr 1fr;gap:1px;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--border);margin-bottom:2rem}
+.brief-item{display:grid;grid-template-columns:auto 1fr;gap:.7rem;padding:.85rem 1rem;background:var(--bg-card);position:relative;transition:background .15s}
+.brief-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--cyan);transform:scaleY(0);transform-origin:top;transition:transform .2s}
 .brief-item:hover{background:var(--bg-hover)}
-.brief-num{font-family:var(--font-mono);font-size:1.5rem;font-weight:700;color:var(--cyan);opacity:.45;line-height:1}
+.brief-item:hover::before{transform:scaleY(1)}
+.brief-num{font-family:var(--font-mono);font-size:.78rem;font-weight:700;color:var(--cyan);opacity:.5;padding-top:.12rem}
 .brief-body{min-width:0}
-.brief-cat{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
-.brief-h{font-size:1.08rem;font-weight:600;line-height:1.4;color:var(--white);margin-bottom:.55rem}
-.brief-sum{font-size:.92rem;line-height:1.7;color:#aeb6c4}
-.brief-take{margin-top:.7rem;padding:.5rem 0 .5rem .85rem;border-left:2px solid var(--cyan);font-size:.86rem;line-height:1.6;color:var(--muted)}
-.brief-take b{color:var(--cyan);font-family:var(--font-mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:.25rem}
-.brief-src{display:inline-block;margin-top:.7rem;font-family:var(--font-mono);font-size:.7rem;color:var(--muted);transition:color .15s}
+.brief-h{font-size:.9rem;font-weight:600;line-height:1.35;color:var(--white);margin-bottom:.3rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.brief-sum{font-size:.77rem;line-height:1.5;color:var(--muted);margin-bottom:.45rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.brief-meta{display:flex;align-items:center;justify-content:space-between;gap:.5rem;font-family:var(--font-mono);font-size:.6rem;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
+.brief-src{color:var(--muted);white-space:nowrap;transition:color .15s}
 .brief-src:hover{color:var(--cyan)}
 .feed-label{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-bottom:1rem;padding-bottom:.6rem;border-bottom:1px solid var(--border)}
-@media(max-width:560px){.brief-item{grid-template-columns:1fr;gap:.45rem}.brief-num{font-size:1.05rem}}
+@media(max-width:680px){.brief{grid-template-columns:1fr}}

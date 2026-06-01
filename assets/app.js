@@ -153,17 +153,14 @@ function renderCard(article, isTop) {
 
 function renderBriefItem(a, i) {
   const sum = getLang() === 'zh' ? (a.summary_zh || a.summary || '') : (a.summary || '');
-  const take = a.editor_note
-    ? `<div class="brief-take"><b>Editor's Take · 为什么重要</b>${a.editor_note}</div>` : '';
   const src = a.original_url
-    ? `<a class="brief-src" href="${a.original_url}" target="_blank" rel="noopener">来源 ${a.source_name || 'source'} →</a>` : '';
+    ? `<a class="brief-src" href="${a.original_url}" target="_blank" rel="noopener">${a.source_name || 'source'} →</a>` : '';
   return `<div class="brief-item">
-    <div class="brief-num">${String(i + 1).padStart(2, '0')}</div>
+    <span class="brief-num">${String(i + 1).padStart(2, '0')}</span>
     <div class="brief-body">
-      <div class="brief-cat">${a.category || 'crypto'} · ●${a.importance_score}</div>
       <div class="brief-h">${a.title}</div>
       <div class="brief-sum">${sum}</div>
-      ${take}${src}
+      <div class="brief-meta"><span>${a.category || 'crypto'} · ●${a.importance_score}</span>${src}</div>
     </div>
   </div>`;
 }
