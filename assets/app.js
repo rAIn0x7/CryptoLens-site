@@ -158,9 +158,8 @@ function renderBriefItem(a, i) {
   return `<div class="brief-item">
     <span class="brief-num">${String(i + 1).padStart(2, '0')}</span>
     <div class="brief-body">
-      <div class="brief-h">${a.title}</div>
-      <div class="brief-sum">${sum}</div>
-      <div class="brief-meta"><span>${a.category || 'crypto'} · ●${a.importance_score}</span>${src}</div>
+      <div class="brief-row"><span class="brief-h">${a.title}</span><span class="brief-tag">${a.category || 'crypto'} ●${a.importance_score}</span></div>
+      <div class="brief-sum">${sum} ${src}</div>
     </div>
   </div>`;
 }
