@@ -1188,3 +1188,24 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 .feed-error,.feed-empty{padding:2.2rem 1.5rem;text-align:center;color:var(--muted);font-family:var(--font-mono);font-size:.85rem;line-height:1.8;border:1px dashed var(--border);border-radius:var(--radius)}
 .feed-error button{margin-left:.6rem;background:none;border:1px solid var(--cyan);color:var(--cyan);padding:.35rem .9rem;border-radius:5px;cursor:pointer;font-family:inherit;font-size:.8rem;transition:all .15s}
 .feed-error button:hover{background:var(--cyan);color:#000}
+
+/* ── DAILY BRIEF ── */
+.brief-section{padding:1.5rem 0 .5rem}
+.brief-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;margin-bottom:1rem}
+.brief-kicker{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.18em;color:var(--cyan);text-transform:uppercase}
+.brief-date{font-family:var(--font-mono);font-size:.7rem;color:var(--muted)}
+.brief{display:flex;flex-direction:column;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:2.5rem;background:var(--bg-card)}
+.brief-item{display:grid;grid-template-columns:auto 1fr;gap:1.1rem;padding:1.3rem 1.4rem;border-bottom:1px solid var(--border);transition:background .15s}
+.brief-item:last-child{border-bottom:none}
+.brief-item:hover{background:var(--bg-hover)}
+.brief-num{font-family:var(--font-mono);font-size:1.5rem;font-weight:700;color:var(--cyan);opacity:.45;line-height:1}
+.brief-body{min-width:0}
+.brief-cat{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.brief-h{font-size:1.08rem;font-weight:600;line-height:1.4;color:var(--white);margin-bottom:.55rem}
+.brief-sum{font-size:.92rem;line-height:1.7;color:#aeb6c4}
+.brief-take{margin-top:.7rem;padding:.5rem 0 .5rem .85rem;border-left:2px solid var(--cyan);font-size:.86rem;line-height:1.6;color:var(--muted)}
+.brief-take b{color:var(--cyan);font-family:var(--font-mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:.25rem}
+.brief-src{display:inline-block;margin-top:.7rem;font-family:var(--font-mono);font-size:.7rem;color:var(--muted);transition:color .15s}
+.brief-src:hover{color:var(--cyan)}
+.feed-label{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.18em;color:var(--muted);text-transform:uppercase;margin-bottom:1rem;padding-bottom:.6rem;border-bottom:1px solid var(--border)}
+@media(max-width:560px){.brief-item{grid-template-columns:1fr;gap:.45rem}.brief-num{font-size:1.05rem}}

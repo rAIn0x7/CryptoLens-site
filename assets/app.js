@@ -151,22 +151,46 @@ function renderCard(article, isTop) {
     </div>`;
 }
 
+function renderBriefItem(a, i) {
+  const sum = getLang() === 'zh' ? (a.summary_zh || a.summary || '') : (a.summary || '');
+  const take = a.editor_note
+    ? `<div class="brief-take"><b>Editor's Take · 为什么重要</b>${a.editor_note}</div>` : '';
+  const src = a.original_url
+    ? `<a class="brief-src" href="${a.original_url}" target="_blank" rel="noopener">来源 ${a.source_name || 'source'} →</a>` : '';
+  return `<div class="brief-item">
+    <div class="brief-num">${String(i + 1).padStart(2, '0')}</div>
+    <div class="brief-body">
+      <div class="brief-cat">${a.category || 'crypto'} · ●${a.importance_score}</div>
+      <div class="brief-h">${a.title}</div>
+      <div class="brief-sum">${sum}</div>
+      ${take}${src}
+    </div>
+  </div>`;
+}
+
 async function loadTodaysTop() {
   const sb = window.CL.supabase;
-  const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  const since = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
 
-  const { data } = await sb
+  let { data } = await sb
     .from('articles_public')
     .select('*')
     .gte('published_at', since)
-    .gte('importance_score', 8)
     .order('importance_score', { ascending: false })
-    .limit(5);
+    .limit(4);
+  if (!data?.length) {
+    ({ data } = await sb.from('articles_public').select('*')
+      .order('importance_score', { ascending: false }).limit(4));
+  }
+
+  const dateEl = document.getElementById('brief-date');
+  if (dateEl) dateEl.textContent = new Date().toLocaleDateString(
+    getLang() === 'zh' ? 'zh-CN' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
   const container = document.getElementById('top-grid');
   if (!container) return;
-  if (!data?.length) { container.closest('.top-section')?.classList.add('hidden'); return; }
-  container.innerHTML = data.map(a => renderCard(a, true)).join('');
+  if (!data?.length) { container.closest('.brief-section')?.classList.add('hidden'); return; }
+  container.innerHTML = data.map((a, i) => renderBriefItem(a, i)).join('');
 }
 
 async function loadFeed(reset) {
