@@ -103,7 +103,7 @@ function renderEditorNote(article) {
     return `
       <div class="editor-note-wrap">
         <div class="editor-note-label">Editor's Take</div>
-        <div class="editor-note">${article.editor_note}</div>
+        <div class="editor-note">${escapeHtml(article.editor_note)}</div>
       </div>`;
   }
   if (article.is_pro && !window.CL.isPro()) {
@@ -127,38 +127,39 @@ function renderEditorNote(article) {
 
 function renderCard(article, isTop) {
   const catClass = CAT_BADGE_CLASS[article.category] || 'badge-cat-crypto';
+  // escapeHtml everywhere: titles/summaries/tags come from third-party RSS
   const tags = (article.tags || []).slice(0, 4).map(t =>
-    `<span class="tag" onclick="filterByTag('${t}')">#${t}</span>`
+    `<span class="tag" data-tag="${escapeHtml(t)}" onclick="filterByTag(this.dataset.tag)">#${escapeHtml(t)}</span>`
   ).join('');
 
   return `
     <div class="card ${isTop ? 'top-card' : ''} ${article.is_pro ? 'pro-card' : ''}"
          onclick="openArticle('${article.id}')">
       <div class="card-meta">
-        <span class="card-source">${article.source_name || 'Unknown'} · ${timeAgo(article.published_at)}</span>
+        <span class="card-source">${escapeHtml(article.source_name || 'Unknown')} · ${timeAgo(article.published_at)}</span>
         <div class="card-badges">
-          <span class="badge ${catClass}">${article.category || 'crypto'}</span>
-          <span class="score-badge ${scoreClass(article.importance_score)}">●${article.importance_score}</span>
+          <span class="badge ${catClass}">${escapeHtml(article.category || 'crypto')}</span>
+          <span class="score-badge ${scoreClass(article.importance_score)}">●${escapeHtml(String(article.importance_score ?? ''))}</span>
         </div>
       </div>
-      <a class="card-title" href="${article.original_url}" target="_blank"
+      <a class="card-title" href="${escapeHtml(article.original_url || '#')}" target="_blank"
          rel="noopener" onclick="event.stopPropagation()">
-        ${article.title}
+        ${escapeHtml(article.title)}
       </a>
-      <p class="card-summary">${getLang() === 'zh' ? (article.summary_zh || article.summary || '') : (article.summary || '')}</p>
+      <p class="card-summary">${escapeHtml(getLang() === 'zh' ? (article.summary_zh || article.summary || '') : (article.summary || ''))}</p>
       ${tags ? `<div class="card-tags">${tags}</div>` : ''}
       ${renderEditorNote(article)}
     </div>`;
 }
 
 function renderBriefItem(a, i) {
-  const sum = getLang() === 'zh' ? (a.summary_zh || a.summary || '') : (a.summary || '');
+  const sum = escapeHtml(getLang() === 'zh' ? (a.summary_zh || a.summary || '') : (a.summary || ''));
   const src = a.original_url
-    ? `<a class="brief-src" href="${a.original_url}" target="_blank" rel="noopener">${a.source_name || 'source'} →</a>` : '';
+    ? `<a class="brief-src" href="${escapeHtml(a.original_url)}" target="_blank" rel="noopener">${escapeHtml(a.source_name || 'source')} →</a>` : '';
   return `<div class="brief-item">
     <span class="brief-num">${String(i + 1).padStart(2, '0')}</span>
     <div class="brief-body">
-      <div class="brief-row"><span class="brief-h">${a.title}</span><span class="brief-tag">${a.category || 'crypto'} ●${a.importance_score}</span></div>
+      <div class="brief-row"><span class="brief-h">${escapeHtml(a.title)}</span><span class="brief-tag">${escapeHtml(a.category || 'crypto')} ●${escapeHtml(String(a.importance_score ?? ''))}</span></div>
       <div class="brief-sum">${sum} ${src}</div>
     </div>
   </div>`;

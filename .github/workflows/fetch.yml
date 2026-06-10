@@ -2,7 +2,10 @@ name: Fetch Articles
 
 on:
   schedule:
+    # Two offset schedules: GitHub often skips/throttles busy on-the-hour slots,
+    # which had degraded the designed every-2h cadence to ~1-2 runs/day.
     - cron: '0 */2 * * *'
+    - cron: '37 1-23/2 * * *'
   workflow_dispatch:
 
 jobs:
@@ -20,6 +23,14 @@ jobs:
 
       - name: Fetch and process articles
         run: node scripts/fetch.js
+        env:
+          SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GEMINI_API_KEY:            ${{ secrets.GEMINI_API_KEY }}
+
+      - name: Fetch stock + metal verticals (StockLens / MetalLens)
+        if: always()   # crypto failure must not starve the other two sites
+        run: node scripts/fetch-verticals.js
         env:
           SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
