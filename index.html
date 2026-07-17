@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="CryptoLens — Filtered crypto × AI intelligence. Save 2 hours daily on noise.">
-<title>CryptoLens — Crypto × AI Intelligence</title>
+<meta name="description" content="QiZh Lens — Filtered crypto × AI intelligence. Save 2 hours daily on noise.">
+<title>QiZh Lens — Crypto × AI Intelligence</title>
 <link rel="preconnect" href="https://fonts.loli.net">
 <link href="https://fonts.loli.net/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
@@ -12,14 +12,14 @@
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2184467660826262" crossorigin="anonymous"></script>
 <link rel="canonical" href="https://lens.qizh.space/">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="CryptoLens">
-<meta property="og:title" content="CryptoLens — Crypto × AI Intelligence">
-<meta property="og:description" content="CryptoLens — Filtered crypto × AI intelligence. Save 2 hours daily on noise.">
+<meta property="og:site_name" content="QiZh Lens">
+<meta property="og:title" content="QiZh Lens — Crypto × AI Intelligence">
+<meta property="og:description" content="QiZh Lens — Filtered crypto × AI intelligence. Save 2 hours daily on noise.">
 <meta property="og:url" content="https://lens.qizh.space/">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="CryptoLens — Crypto × AI Intelligence">
-<meta name="twitter:description" content="CryptoLens — Filtered crypto × AI intelligence. Save 2 hours daily on noise.">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"CryptoLens","url":"https://lens.qizh.space/","description":"CryptoLens — Filtered crypto × AI intelligence. Save 2 hours daily on noise.","publisher":{"@type":"Organization","name":"CryptoLens","url":"https://lens.qizh.space/"}}</script>
+<meta name="twitter:title" content="QiZh Lens — Crypto × AI Intelligence">
+<meta name="twitter:description" content="QiZh Lens — Filtered crypto × AI intelligence. Save 2 hours daily on noise.">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"QiZh Lens","url":"https://lens.qizh.space/","description":"QiZh Lens — Filtered crypto × AI intelligence. Save 2 hours daily on noise.","publisher":{"@type":"Organization","name":"QiZh Lens","url":"https://lens.qizh.space/"}}</script>
 </head>
 <body>
 
@@ -27,7 +27,7 @@
 <div class="modal-overlay hidden" id="auth-modal">
   <div class="modal" style="position:relative">
     <button class="modal-close" onclick="CL.auth.closeLoginModal()">×</button>
-    <h2>Sign in to CryptoLens</h2>
+    <h2>Sign in to QiZh Lens</h2>
     <p>Enter your email — we'll send a magic link. No password needed.</p>
     <input type="email" id="modal-email" placeholder="you@example.com">
     <button class="btn btn-primary" style="width:100%" onclick="handleModalLogin()">Send Magic Link</button>
@@ -37,7 +37,12 @@
 
 <!-- NAV -->
 <nav class="nav">
-  <a href="/" class="nav-logo">CRYPTO<span>LENS</span></a>
+  <a href="/" class="nav-logo">QIZH<span>LENS</span></a>
+  <div class="channel-tabs">
+    <a href="/" class="channel-tab active">加密</a>
+    <a href="/metals/" class="channel-tab">贵金属</a>
+    <a href="/stocks/" class="channel-tab">股票</a>
+  </div>
   <div class="nav-filters">
     <button class="nav-filter active" data-cat="all"        onclick="setCategory('all')">ALL</button>
     <button class="nav-filter"        data-cat="cross"      onclick="setCategory('cross')">CROSS</button>
@@ -49,8 +54,6 @@
   <div class="nav-actions">
     <span class="badge badge-cat-cross hidden" id="nav-pro-label">PRO</span>
     <a href="https://qizh.space" target="_blank" rel="noopener" class="btn btn-ghost btn-sm nav-brand-link">ZION ↗</a>
-    <a href="https://stocks.qizh.space" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">STOCKS ↗</a>
-    <a href="https://metals.qizh.space" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">METALS ↗</a>
     <button class="btn btn-ghost btn-sm" id="lang-toggle" onclick="toggleLang()">EN</button>
     <button class="btn btn-ghost btn-sm" id="nav-login-btn"  onclick="CL.auth.openLoginModal()" data-i18n="signIn">Sign In</button>
     <button class="btn btn-ghost btn-sm hidden" id="nav-logout-btn" onclick="CL.auth.signOut()" data-i18n="signOut">Sign Out</button>
@@ -109,6 +112,11 @@
       <div class="load-more">
         <button id="load-more-btn" onclick="loadFeed()" data-i18n="loadMore">Load more</button>
       </div>
+
+      <details class="aux-details" id="aux-details" style="display:none">
+        <summary id="aux-summary">辅助 · 更多 · MORE</summary>
+        <div class="feed" id="aux-feed"></div>
+      </details>
     </main>
 
     <aside class="sidebar">
@@ -136,7 +144,7 @@
 </div>
 
 <footer class="footer">
-  <p class="footer-disclaimer">CryptoLens aggregates information from third-party sources for informational purposes only. Nothing on this site constitutes financial or investment advice. Always do your own research before making any investment decisions. Cryptocurrency investments carry significant risk.</p>
+  <p class="footer-disclaimer">QiZh Lens aggregates information from third-party sources for informational purposes only. Nothing on this site constitutes financial or investment advice. Always do your own research before making any investment decisions. Cryptocurrency investments carry significant risk.</p>
   <div class="footer-links">
     <a href="index.html">Home</a>
     <a href="subscribe.html">Subscribe</a>

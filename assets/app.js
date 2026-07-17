@@ -190,6 +190,53 @@ async function loadTodaysTop() {
   container.innerHTML = data.map((a, i) => renderBriefItem(a, i)).join('');
 }
 
+/* ── MAINSTREAM (featured) vs AUXILIARY split — pure front-end filter ── */
+const MAINSTREAM_SCORE = 8; // importance_score >= this always counts as mainstream
+const MAINSTREAM_RE = /(bitcoin|比特币|ethereum|以太坊|solana|\bbtc\b|\beth\b|\bsol\b|\bbnb\b)/i;
+
+function isMainstream(a) {
+  const hay = [a.title, a.category, ...(a.tags || [])].join(' ').toLowerCase();
+  return MAINSTREAM_RE.test(hay);
+}
+
+let _auxBuffer = [];      // auxiliary articles not yet painted (rendered lazily on open)
+let _auxCount = 0;
+let _auxRendered = false; // becomes true once <details> is opened
+
+function _resetAux() {
+  _auxBuffer = []; _auxCount = 0; _auxRendered = false;
+  const f = document.getElementById('aux-feed'); if (f) f.innerHTML = '';
+  const d = document.getElementById('aux-details'); if (d) { d.open = false; d.style.display = 'none'; }
+}
+
+function _pushAux(items) {
+  _auxCount += items.length;
+  if (_auxRendered) {
+    document.getElementById('aux-feed')?.insertAdjacentHTML('beforeend', items.map(a => renderCard(a, false)).join(''));
+  } else {
+    _auxBuffer.push(...items);
+  }
+  const d = document.getElementById('aux-details'); if (d) d.style.display = '';
+  const s = document.getElementById('aux-summary'); if (s) s.textContent = `辅助 · 更多 · MORE (${_auxCount})`;
+  _bindAuxToggle();
+}
+
+function _bindAuxToggle() {
+  const d = document.getElementById('aux-details');
+  if (!d || d._bound) return;
+  d._bound = true;
+  d.addEventListener('toggle', () => {
+    if (d.open && !_auxRendered) {
+      _auxRendered = true;
+      const f = document.getElementById('aux-feed');
+      if (f && _auxBuffer.length) {
+        f.insertAdjacentHTML('beforeend', _auxBuffer.map(a => renderCard(a, false)).join(''));
+        _auxBuffer = [];
+      }
+    }
+  });
+}
+
 async function loadFeed(reset) {
   if (isLoading || (!hasMore && !reset)) return;
   if (reset) { currentOffset = 0; hasMore = true; }
@@ -222,8 +269,16 @@ async function loadFeed(reset) {
   }
   if (data.length < PAGE_SIZE) { hasMore = false; _hideLoadMore(); }
   if (!container) return;
-  if (reset) container.innerHTML = '';
-  container.insertAdjacentHTML('beforeend', data.map(a => renderCard(a, false)).join(''));
+  if (reset) { container.innerHTML = ''; _resetAux(); }
+
+  // Front-end split: mainstream (featured) pinned in the main feed, rest into the collapsed aux section
+  let main = [], aux = [];
+  for (const a of data) (isMainstream(a) ? main : aux).push(a);
+  // Graceful degradation: if the very first page surfaces zero mainstream, just list everything
+  if (reset && main.length === 0) { main = data; aux = []; }
+
+  if (main.length) container.insertAdjacentHTML('beforeend', main.map(a => renderCard(a, false)).join(''));
+  if (aux.length) _pushAux(aux);
   currentOffset += data.length;
 }
 
