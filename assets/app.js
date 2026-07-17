@@ -408,35 +408,10 @@ let _btcWsRetries = 0;
 let _btcWsFallbackTimer = null;
 
 function initBtcWebSocket() {
-  const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker');
-
-  ws.onopen = () => {
-    setLiveStatus(true);
-    _btcWsRetries = 0;
-    if (_btcWsFallbackTimer) { clearInterval(_btcWsFallbackTimer); _btcWsFallbackTimer = null; }
-  };
-
-  ws.onmessage = (e) => {
-    const d = JSON.parse(e.data);
-    updateBtcPrice({
-      price:  parseFloat(d.c),
-      change: parseFloat(d.P),
-      high:   parseFloat(d.h),
-      low:    parseFloat(d.l),
-      volume: parseFloat(d.v),
-    });
-  };
-
-  ws.onclose = ws.onerror = () => {
-    ws.onclose = ws.onerror = null;
-    setLiveStatus(false);
-    if (_btcWsRetries < 10) {
-      _btcWsRetries++;
-      setTimeout(initBtcWebSocket, 3000);
-    } else {
-      _startBtcFallbackPoll();
-    }
-  };
+  // wss://stream.binance.com 在中国大陆被阻断(WS 一直 RESET),而 api.binance.com REST 国内可达。
+  // 因此直接走 REST 轮询(每 10s),不再尝试 WS —— 消除国内用户满屏 WS 报错与 30s 延迟。
+  setLiveStatus(true);
+  _startBtcFallbackPoll();
 }
 
 function setLiveStatus(live) {

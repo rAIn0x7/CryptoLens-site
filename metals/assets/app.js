@@ -192,7 +192,7 @@ async function loadTodaysTop() {
 
 /* ── MAINSTREAM (featured) vs AUXILIARY split — pure front-end filter ── */
 const MAINSTREAM_SCORE = 8; // importance_score >= this always counts as mainstream
-const MAINSTREAM_RE = /(gold|黄金|\bxau\b|silver|白银|\bxag\b)/i;
+const MAINSTREAM_RE = /(gold|黄金|\bxau\b|silver|白银|\bxag\b|oil|原油|crude|\bwti\b|brent|copper|铜|platinum|铂|天然气|natural gas)/i;
 
 function isMainstream(a) {
   const hay = [a.title, a.category, ...(a.tags || [])].join(' ').toLowerCase();

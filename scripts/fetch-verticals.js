@@ -1,4 +1,4 @@
-// StockLens + MetalLens content pipeline.
+// QiZh Lens + QiZh Lens content pipeline.
 // Lives in the CryptoLens repo so it reuses the same GitHub Actions secrets
 // (SUPABASE_SERVICE_ROLE_KEY / GEMINI_API_KEY) — runs right after fetch.js.
 // Tables: stock_articles/stock_pulses, metal_articles/metal_pulses
@@ -19,11 +19,11 @@ const parser = new Parser({ timeout: 10000 });
 
 const VERTICALS = [
   {
-    name: 'StockLens',
+    name: 'QiZh Lens',
     articlesTable: 'stock_articles',
     pulsesTable: 'stock_pulses',
     categories: ['tech', 'elon', 'macro', 'earnings', 'ai'],
-    persona: 'StockLens, a stocks × AI intelligence platform (US equities, tech, macro, earnings)',
+    persona: 'QiZh Lens, a stocks × AI intelligence platform (US equities, tech, macro, earnings)',
     pulsePersona: 'senior equity market analyst',
     sources: [
       { name: 'CNBC Top News',   feed_url: 'https://www.cnbc.com/id/100003114/device/rss/rss.html', category: 'macro' },
@@ -34,11 +34,11 @@ const VERTICALS = [
     ],
   },
   {
-    name: 'MetalLens',
+    name: 'QiZh Lens',
     articlesTable: 'metal_articles',
     pulsesTable: 'metal_pulses',
     categories: ['gold', 'silver', 'oil', 'macro', 'ai'],
-    persona: 'MetalLens, a commodities × AI intelligence platform (gold, silver, oil, macro)',
+    persona: 'QiZh Lens, a commodities × AI intelligence platform (gold, silver, oil, macro)',
     pulsePersona: 'senior commodities market analyst',
     sources: [
       { name: 'Mining.com',      feed_url: 'https://www.mining.com/feed/',  category: 'gold' },

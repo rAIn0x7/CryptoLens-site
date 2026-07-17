@@ -49,8 +49,8 @@ function articleBlock(article, includePro) {
 
 function buildEmail(articles, isPro, isWeekly) {
   const subject = isWeekly
-    ? `CryptoLens Weekly | ${TODAY} — Top ${articles.length}`
-    : `CryptoLens Daily | ${TODAY} — Top ${Math.min(5, articles.length)}`;
+    ? `QiZh Lens Weekly | ${TODAY} — Top ${articles.length}`
+    : `QiZh Lens Daily | ${TODAY} — Top ${Math.min(5, articles.length)}`;
 
   const sliced = isWeekly ? articles : articles.slice(0, 5);
 
@@ -77,8 +77,8 @@ function buildEmail(articles, isPro, isWeekly) {
     </div>
 
     <div style="border-top:1px solid rgba(0,212,255,0.1);padding-top:16px;font-size:11px;color:#6b7280;line-height:1.6">
-      <p>CryptoLens aggregates information from third-party sources for informational purposes only. Nothing on this site constitutes financial or investment advice. Always do your own research. Cryptocurrency investments carry significant risk.</p>
-      <p style="margin-top:8px"><a href="https://lens.qizh.space" style="color:#6b7280">Visit CryptoLens</a> · <a href="https://lens.qizh.space/subscribe.html" style="color:#6b7280">Manage subscription</a></p>
+      <p>QiZh Lens aggregates information from third-party sources for informational purposes only. Nothing on this site constitutes financial or investment advice. Always do your own research. Cryptocurrency investments carry significant risk.</p>
+      <p style="margin-top:8px"><a href="https://lens.qizh.space" style="color:#6b7280">Visit QiZh Lens</a> · <a href="https://lens.qizh.space/subscribe.html" style="color:#6b7280">Manage subscription</a></p>
     </div>
   </div>
 </body>
@@ -104,7 +104,7 @@ async function sendBatch(emails, subject, html, tag) {
 
   for (const chunk of chunks) {
     const messages = chunk.map(email => ({
-      from: 'CryptoLens <signal@lens.qizh.space>',
+      from: 'QiZh Lens <signal@lens.qizh.space>',
       to: email,
       subject,
       html
@@ -116,7 +116,7 @@ async function sendBatch(emails, subject, html, tag) {
 }
 
 async function main() {
-  console.log('CryptoLens newsletter:', new Date().toISOString());
+  console.log('QiZh Lens newsletter:', new Date().toISOString());
 
   const isWeekly = DAY === 1;
   const articles = await getTopArticles(isWeekly ? 168 : 24);

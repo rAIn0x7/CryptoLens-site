@@ -56,7 +56,7 @@ async function processBatchWithGemini(articles) {
     `[${i}] Source: ${a.source_name} | Category hint: ${a.source_category}\nTitle: ${a.title}\nSnippet: ${a.content.slice(0, 400)}`
   ).join('\n\n');
 
-  const prompt = `You are an editorial assistant for CryptoLens, a crypto × AI intelligence platform.
+  const prompt = `You are an editorial assistant for QiZh Lens, a crypto × AI intelligence platform.
 Analyze each of these ${articles.length} articles and return a JSON array. Respond with ONLY valid JSON — no markdown fences, no explanation.
 
 Scoring:
@@ -190,7 +190,7 @@ Return ONLY valid JSON — no markdown, no explanation:
 }
 
 async function main() {
-  console.log('CryptoLens fetch started:', new Date().toISOString());
+  console.log('QiZh Lens fetch started:', new Date().toISOString());
 
   const sources = await loadSources();
   console.log(`Loaded ${sources.length} active sources`);
