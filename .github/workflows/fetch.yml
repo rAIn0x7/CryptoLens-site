@@ -2,10 +2,10 @@ name: Fetch Articles
 
 on:
   schedule:
-    # Two offset schedules: GitHub often skips/throttles busy on-the-hour slots,
-    # which had degraded the designed every-2h cadence to ~1-2 runs/day.
-    - cron: '0 */2 * * *'
-    - cron: '37 1-23/2 * * *'
+    # 每 4 小时一次(6 次/天),用 :17 避开被 GitHub throttle 的整点忙时槽。
+    # 从原来每小时(~24 次/天)降下来,给三个垂直的 Gemini 免费额度留足空间;
+    # 日报无需每小时刷,4 小时足够。需要更勤可改小间隔(注意 Gemini 250/天限额)。
+    - cron: '17 */4 * * *'
   workflow_dispatch:
 
 jobs:

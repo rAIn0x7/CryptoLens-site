@@ -47,6 +47,23 @@ const VERTICALS = [
       { name: 'Google News · Oil',    feed_url: 'https://news.google.com/rss/search?q=oil%20price%20OR%20OPEC%20when:1d&hl=en-US&gl=US&ceid=US:en', category: 'oil' },
     ],
   },
+  {
+    name: 'QiZh Lens',
+    articlesTable: 'startup_articles',
+    pulsesTable: 'startup_pulses',
+    categories: ['startup', 'indie', 'overseas', 'ai', 'funding', 'tools'],
+    persona: 'QiZh Lens, a startup × indie-hacker × going-global intelligence platform (solo founders, bootstrapping, product launches, overseas/出海 expansion, AI tools & funding)',
+    pulsePersona: 'senior startup & indie-hacker analyst who advises solo founders',
+    sources: [
+      { name: 'Hacker News Front', feed_url: 'https://hnrss.org/frontpage',                 category: 'tools' },
+      { name: 'TechCrunch Startups', feed_url: 'https://techcrunch.com/category/startups/feed/', category: 'startup' },
+      { name: 'Product Hunt',      feed_url: 'https://www.producthunt.com/feed',            category: 'tools' },
+      { name: '36Kr',              feed_url: 'https://36kr.com/feed',                        category: 'startup' },
+      { name: 'Google News · Indie', feed_url: 'https://news.google.com/rss/search?q=indie%20hacker%20OR%20solo%20founder%20OR%20bootstrapped%20startup%20when:2d&hl=en-US&gl=US&ceid=US:en', category: 'indie' },
+      { name: 'Google News · 出海', feed_url: 'https://news.google.com/rss/search?q=%E5%87%BA%E6%B5%B7%20OR%20%E5%93%81%E7%89%8C%E5%87%BA%E6%B5%B7%20OR%20%E8%B7%A8%E5%A2%83%20when:2d&hl=zh-CN&gl=CN&ceid=CN:zh', category: 'overseas' },
+      { name: 'Google News · Funding', feed_url: 'https://news.google.com/rss/search?q=startup%20funding%20OR%20seed%20round%20OR%20YC%20when:2d&hl=en-US&gl=US&ceid=US:en', category: 'funding' },
+    ],
+  },
 ];
 
 async function fetchRSS(source) {
@@ -184,7 +201,8 @@ async function runVertical(v) {
   }
   const fresh = await dedupe(v.articlesTable, all);
   console.log(`New articles: ${fresh.length}/${all.length}`);
-  if (!fresh.length) { await generatePulse(v); return; }
+  // 省 Gemini 额度:没新文章就别空跑 pulse(pulse 只在真有新文章入库后刷新)
+  if (!fresh.length) { console.log(`${v.name}: no fresh, skip pulse`); return; }
 
   const scored = await scoreBatch(v, fresh);
   let inserted = 0;
@@ -213,7 +231,9 @@ async function runVertical(v) {
     }
   }
   console.log(`${v.name} inserted: ${inserted}`);
-  await generatePulse(v);
+  // 省 Gemini 额度:只有真有高信号文章入库才刷新 pulse
+  if (inserted > 0) await generatePulse(v);
+  else console.log(`${v.name}: 0 inserted, skip pulse`);
 }
 
 async function main() {

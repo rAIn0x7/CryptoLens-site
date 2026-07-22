@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="QiZh Lens — AI 过滤的创业 / 独立开发 / 出海情报。每天为 solo founder 省下 2 小时噪音。">
+<title>QiZh Lens — 创业 · 独立开发 · 出海情报</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2184467660826262" crossorigin="anonymous"></script>
+<link rel="preconnect" href="https://fonts.loli.net">
+<link href="https://fonts.loli.net/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+
+<link rel="canonical" href="https://lens.qizh.space/startup/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="QiZh Lens">
+<meta property="og:title" content="QiZh Lens — 创业 · 独立开发 · 出海情报">
+<meta property="og:description" content="QiZh Lens — AI 过滤的创业 / 独立开发 / 出海情报。每天为 solo founder 省下 2 小时噪音。">
+<meta property="og:url" content="https://lens.qizh.space/startup/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="QiZh Lens — 创业 · 独立开发 · 出海情报">
+<meta name="twitter:description" content="QiZh Lens — AI 过滤的创业 / 独立开发 / 出海情报。每天为 solo founder 省下 2 小时噪音。">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"QiZh Lens","url":"https://lens.qizh.space/startup/","description":"QiZh Lens — AI-filtered startup, indie-hacker & going-global intelligence for solo founders.","publisher":{"@type":"Organization","name":"QiZh Lens","url":"https://lens.qizh.space/startup/"}}</script>
+</head>
+<body>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay hidden" id="auth-modal">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="CL.auth.closeLoginModal()">×</button>
+    <h2>Sign in to QiZh Lens</h2>
+    <p>Enter your email — we'll send a magic link. No password needed.</p>
+    <input type="email" id="modal-email" placeholder="you@example.com">
+    <button class="btn btn-primary" style="width:100%" onclick="handleModalLogin()">Send Magic Link</button>
+    <p class="msg" id="modal-msg"></p>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="/" class="nav-logo">QIZH<span>LENS</span></a>
+  <div class="channel-tabs">
+    <a href="/" class="channel-tab">加密</a>
+    <a href="/metals/" class="channel-tab">大宗商品</a>
+    <a href="/stocks/" class="channel-tab">股票</a>
+    <a href="/startup/" class="channel-tab active">创业出海</a>
+  </div>
+  <div class="nav-filters">
+    <button class="nav-filter active" data-cat="all"      onclick="setCategory('all')">全部</button>
+    <button class="nav-filter" data-cat="startup"         onclick="setCategory('startup')">创业</button>
+    <button class="nav-filter" data-cat="indie"           onclick="setCategory('indie')">独立开发</button>
+    <button class="nav-filter" data-cat="overseas"        onclick="setCategory('overseas')">出海</button>
+    <button class="nav-filter" data-cat="ai"              onclick="setCategory('ai')">AI</button>
+    <button class="nav-filter" data-cat="funding"         onclick="setCategory('funding')">融资</button>
+    <button class="nav-filter" data-cat="tools"           onclick="setCategory('tools')">工具</button>
+  </div>
+  <div class="nav-actions">
+    <span class="badge badge-cat-startup hidden" id="nav-pro-label">PRO</span>
+    <a href="https://qizh.space" target="_blank" rel="noopener" class="btn btn-ghost btn-sm nav-brand-link">ZION ↗</a>
+    <button class="btn btn-ghost btn-sm" id="lang-toggle" onclick="toggleLang()">EN</button>
+    <button class="btn btn-ghost btn-sm" id="nav-login-btn"  onclick="CL.auth.openLoginModal()" data-i18n="signIn">Sign In</button>
+    <button class="btn btn-ghost btn-sm hidden" id="nav-logout-btn" onclick="CL.auth.signOut()" data-i18n="signOut">Sign Out</button>
+    <a href="subscribe.html" class="btn btn-primary btn-sm">Subscribe</a>
+  </div>
+</nav>
+
+<!-- STARTUP PULSE HERO -->
+<div class="pulse-hero pulse-hero-solo" id="pulse-hero">
+  <div class="pulse-hero-glow"></div>
+  <div class="container">
+    <div class="pulse-hero-grid">
+      <div class="pulse-hero-inner" id="pulse-card">
+        <div class="card skeleton" style="height:200px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- TODAY'S TOP -->
+  <div class="brief-section">
+    <div class="brief-head">
+      <span class="brief-kicker">今日简报 · DAILY BRIEF</span>
+      <span class="brief-date" id="brief-date"></span>
+    </div>
+    <div class="brief" id="top-grid">
+      <div class="card skeleton" style="height:120px"></div>
+      <div class="card skeleton" style="height:120px"></div>
+      <div class="card skeleton" style="height:120px"></div>
+    </div>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="page-grid">
+    <main>
+      <div class="feed-label">完整动态 · ALL UPDATES</div>
+      <div class="feed" id="feed">
+        <div class="card skeleton" style="height:140px"></div>
+        <div class="card skeleton" style="height:140px"></div>
+        <div class="card skeleton" style="height:140px"></div>
+      </div>
+      <div class="load-more">
+        <button id="load-more-btn" onclick="loadFeed()" data-i18n="loadMore">Load more</button>
+      </div>
+
+      <details class="aux-details" id="aux-details" style="display:none">
+        <summary id="aux-summary">辅助 · 更多 · MORE</summary>
+        <div class="feed" id="aux-feed"></div>
+      </details>
+    </main>
+
+    <aside class="sidebar">
+      <div class="sidebar-block sidebar-subscribe">
+        <div class="sidebar-title" data-i18n="weeklySignal">Free Weekly Signal</div>
+        <p data-i18n="weeklyDesc">Top 10 stories every Monday. No spam.</p>
+        <input type="email" id="sidebar-email" placeholder="your@email.com">
+        <button class="btn btn-primary" style="width:100%" onclick="sidebarSubscribe()" data-i18n="subFree">Subscribe Free</button>
+        <p class="msg" id="sidebar-msg"></p>
+      </div>
+
+      <div class="sidebar-block">
+        <div class="sidebar-title" data-i18n="trendingTags">Trending Tags</div>
+        <div class="sidebar-tags" id="sidebar-tags"></div>
+      </div>
+
+      <div class="sidebar-block affiliate-block">
+        <span class="aff-label" data-i18n="sponsored">Sponsored</span>
+        <p>用 <a href="https://qizh.space" target="_blank" rel="noopener" onclick="CL.affiliate.track('zion', null)">ZION</a> 的工具工厂,把你的 idea 更快变成能卖的产品。</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<footer class="footer">
+  <p class="footer-disclaimer">QiZh Lens 聚合第三方公开信息,仅供参考与学习。文中任何内容均不构成创业、投资或法律建议。做任何决策前请自行核实。创业与出海有风险,请谨慎评估。</p>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="subscribe.html">Subscribe</a>
+    <a href="about.html">About</a>
+    <a href="mailto:1733680684@qq.com">Contact</a>
+    <a href="privacy.html">Privacy Policy</a>
+  </div>
+</footer>
+
+<script src="assets/supabase.min.js"></script>
+<script src="assets/config.js"></script>
+<script src="assets/auth.js"></script>
+<script src="assets/app.js"></script>
+<script src="assets/affiliate.js"></script>
+<script>
+async function init() {
+  await CL.auth.initAuth();
+  applyLangToDOM();
+  await Promise.all([
+    loadTodaysTop(),
+    loadMarketPulse(),
+    loadSidebarTags(),
+  ]);
+  await loadFeed(true);
+}
+
+async function handleModalLogin() {
+  const email = document.getElementById('modal-email').value.trim();
+  const msg = document.getElementById('modal-msg');
+  const error = await CL.auth.sendMagicLink(email);
+  if (error) { msg.className = 'msg msg-error'; msg.textContent = error.message; }
+  else { msg.className = 'msg msg-success'; msg.textContent = 'Check your email for the magic link!'; }
+}
+
+async function sidebarSubscribe() {
+  const email = document.getElementById('sidebar-email').value.trim();
+  const msg = document.getElementById('sidebar-msg');
+  const { error } = await handleSubscribe(email);
+  if (error) { msg.className = 'msg msg-error'; msg.textContent = 'Already subscribed or invalid email.'; }
+  else { msg.className = 'msg msg-success'; msg.textContent = 'Subscribed! Check your inbox Monday.'; }
+}
+
+document.addEventListener('authChanged', () => { loadFeed(true); loadTodaysTop(); });
+
+init();
+</script>
+<script src="assets/polish.js" defer></script>
+</body>
+</html>
