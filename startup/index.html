@@ -110,10 +110,10 @@
 
     <aside class="sidebar">
       <div class="sidebar-block sidebar-subscribe">
-        <div class="sidebar-title" data-i18n="weeklySignal">Free Weekly Signal</div>
-        <p data-i18n="weeklyDesc">Top 10 stories every Monday. No spam.</p>
+        <div class="sidebar-title" data-i18n="weeklySignal">每周免费信号</div>
+        <p data-i18n="weeklyDesc">每周一推送10条精选，不发垃圾邮件。</p>
         <input type="email" id="sidebar-email" placeholder="your@email.com">
-        <button class="btn btn-primary" style="width:100%" onclick="sidebarSubscribe()" data-i18n="subFree">Subscribe Free</button>
+        <button class="btn btn-primary" style="width:100%" onclick="sidebarSubscribe()" data-i18n="subFree">免费订阅</button>
         <p class="msg" id="sidebar-msg"></p>
       </div>
 
@@ -170,8 +170,8 @@ async function sidebarSubscribe() {
   const email = document.getElementById('sidebar-email').value.trim();
   const msg = document.getElementById('sidebar-msg');
   const { error } = await handleSubscribe(email);
-  if (error) { msg.className = 'msg msg-error'; msg.textContent = 'Already subscribed or invalid email.'; }
-  else { msg.className = 'msg msg-success'; msg.textContent = 'Subscribed! Check your inbox Monday.'; }
+  if (error) { msg.className = 'msg msg-error'; msg.textContent = '已订阅,或邮箱无效。'; }
+  else { msg.className = 'msg msg-success'; msg.textContent = '订阅成功!周一进收件箱查收。'; }
 }
 
 document.addEventListener('authChanged', () => { loadFeed(true); loadTodaysTop(); });
