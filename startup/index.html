@@ -112,6 +112,7 @@
       <div class="sidebar-block sidebar-subscribe">
         <div class="sidebar-title" data-i18n="weeklySignal">每周免费信号</div>
         <p data-i18n="weeklyDesc">每周一推送10条精选，不发垃圾邮件。</p>
+        <input type="text" name="url" id="hp_cl_startup" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute!important;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none">
         <input type="email" id="sidebar-email" placeholder="your@email.com">
         <button class="btn btn-primary" style="width:100%" onclick="sidebarSubscribe()" data-i18n="subFree">免费订阅</button>
         <p class="msg" id="sidebar-msg"></p>
@@ -169,7 +170,8 @@ async function handleModalLogin() {
 async function sidebarSubscribe() {
   const email = document.getElementById('sidebar-email').value.trim();
   const msg = document.getElementById('sidebar-msg');
-  const { error } = await handleSubscribe(email);
+  const hp = document.getElementById('hp_cl_startup');
+  const { error } = await handleSubscribe(email, { hp: hp && hp.value, ts: window.__clFormTs });
   if (error) { msg.className = 'msg msg-error'; msg.textContent = '已订阅,或邮箱无效。'; }
   else { msg.className = 'msg msg-success'; msg.textContent = '订阅成功!周一进收件箱查收。'; }
 }

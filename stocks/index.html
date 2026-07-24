@@ -126,6 +126,7 @@
       <div class="sidebar-block sidebar-subscribe">
         <div class="sidebar-title" data-i18n="weeklySignal">Free Weekly Signal</div>
         <p data-i18n="weeklyDesc">Top 10 stories every Monday. No spam.</p>
+        <input type="text" name="url" id="hp_cl_stocks" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute!important;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none">
         <input type="email" id="sidebar-email" placeholder="your@email.com">
         <button class="btn btn-primary" style="width:100%" onclick="sidebarSubscribe()" data-i18n="subFree">Subscribe Free</button>
         <p class="msg" id="sidebar-msg"></p>
@@ -187,7 +188,8 @@ async function handleModalLogin() {
 async function sidebarSubscribe() {
   const email = document.getElementById('sidebar-email').value.trim();
   const msg = document.getElementById('sidebar-msg');
-  const { error } = await handleSubscribe(email);
+  const hp = document.getElementById('hp_cl_stocks');
+  const { error } = await handleSubscribe(email, { hp: hp && hp.value, ts: window.__clFormTs });
   if (error) { msg.className = 'msg msg-error'; msg.textContent = 'Already subscribed or invalid email.'; }
   else { msg.className = 'msg msg-success'; msg.textContent = 'Subscribed! Check your inbox Monday.'; }
 }

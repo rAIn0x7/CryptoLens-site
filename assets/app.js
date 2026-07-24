@@ -6,6 +6,10 @@ let currentTag = null;
 let isLoading = false;
 let hasMore = true;
 
+// Timestamp captured at script load — subscribe forms use it to reject implausibly
+// fast (bot) submits. Real users need time to scroll/type; auto-fill bots submit instantly.
+if (typeof window !== 'undefined') window.__clFormTs = Date.now();
+
 const STRINGS = {
   en: {
     timeJustNow: 'just now',
@@ -324,8 +328,21 @@ async function loadSidebarTags() {
   ).join('');
 }
 
-async function handleSubscribe(email) {
-  if (!email || !email.includes('@')) return { error: 'Invalid email' };
+// Real-address shape check (not just "contains @").
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// opts.hp  = honeypot field value (should be empty for humans)
+// opts.ts  = timestamp when the form was rendered (page load)
+async function handleSubscribe(email, opts = {}) {
+  // Anti-bot 1: honeypot filled → silently drop. Return a fake success so the bot
+  // sees the same "Subscribed!" path and can't tell it was blocked. Nothing is written.
+  if (opts.hp) return { error: null };
+  // Anti-bot 2: submitted implausibly fast (< 2s from render) → silently drop, same as above.
+  if (opts.ts && (Date.now() - opts.ts) < 2000) return { error: null };
+  // Basic validation: malformed email surfaces as a normal error to the user.
+  if (!email || !isValidEmail(email)) return { error: 'Invalid email' };
   const sb = window.CL.supabase;
   const { error } = await sb.from('subscribers').insert({ email });
   return { error };

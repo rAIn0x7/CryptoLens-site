@@ -38,6 +38,7 @@
   <p class="sub-lead">Filtered crypto · metals · stocks × AI intelligence — 加密 · 大宗商品 · 股票 全领域信号,每天帮你省 2 小时。</p>
 
   <div class="email-input-row">
+    <input type="text" name="website" id="hp_cl_sub" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute!important;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none">
     <input type="email" id="sub-email" placeholder="your@email.com">
     <button class="btn btn-primary" onclick="doSubscribe()">Subscribe Free</button>
   </div>
@@ -107,7 +108,8 @@
 async function doSubscribe() {
   const email = document.getElementById('sub-email').value.trim();
   const msg = document.getElementById('sub-msg');
-  const { error } = await handleSubscribe(email);
+  const hp = document.getElementById('hp_cl_sub');
+  const { error } = await handleSubscribe(email, { hp: hp && hp.value, ts: window.__clFormTs });
   if (error) { msg.className='msg msg-error'; msg.textContent='Already subscribed or invalid email.'; }
   else { msg.className='msg msg-success'; msg.textContent='Subscribed! Weekly newsletter every Monday.'; }
 }
