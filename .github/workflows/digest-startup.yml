@@ -1,0 +1,27 @@
+name: Send Startup Digest
+
+on:
+  # 定时先关着:手动 Run workflow 测好一封(建议先把 subscribers 只留你自己的测试邮箱)再打开下面这段
+  # schedule:
+  #   - cron: '0 1 * * 1'   # 每周一 01:00 UTC = 北京时间周一 09:00
+  workflow_dispatch:
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Send startup digest
+        run: node scripts/digest-startup.js
+        env:
+          SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY:            ${{ secrets.RESEND_API_KEY }}
