@@ -1,8 +1,10 @@
 name: Send Newsletter
 
 on:
-  schedule:
-    - cron: '0 8 * * 1-5'
+  # 已停:改用「创业/出海信号一页纸周报」(digest-startup.yml)为主,受众更对口。
+  # 需要重开 crypto 周报再取消下面注释即可。
+  # schedule:
+  #   - cron: '0 8 * * 1-5'
   workflow_dispatch:
 
 jobs:
