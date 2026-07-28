@@ -1,9 +1,10 @@
 name: Send Startup Digest
 
 on:
-  # 定时先关着:手动 Run workflow 测好一封(建议先把 subscribers 只留你自己的测试邮箱)再打开下面这段
-  # schedule:
-  #   - cron: '0 1 * * 1'   # 每周一 01:00 UTC = 北京时间周一 09:00
+  # 定时已开(2026-07-28)。前置已验:手动 dispatch 跑过两次都 success(2026-07-24),Resend 域名已验证。
+  # 要临时停发就把下面 schedule 两行重新注释掉,workflow_dispatch 保留可手动补发。
+  schedule:
+    - cron: '0 1 * * 1'   # 每周一 01:00 UTC = 北京时间周一 09:00
   workflow_dispatch:
 
 jobs:
