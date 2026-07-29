@@ -2,6 +2,15 @@ import Parser from 'rss-parser';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { createClient } from '@supabase/supabase-js';
 
+/* 全局看门狗:Gemini 已单独限时,但 Supabase 调用、DNS、socket 都可能 hang,
+   而 job 一挂死就会被 timeout-minutes 杀掉 → 每次给 Zion 发一封 cancelled 通知邮件。
+   到点主动、干净地收工:已经写进库的数据不受影响,没抓完的下一轮继续。 */
+const HARD_LIMIT_MS = 7 * 60 * 1000;
+setTimeout(() => {
+  console.log(`\n⏱  到硬时限 7 分钟,主动收工(已入库的数据不受影响,余下的下一轮再抓)`);
+  process.exit(0);
+}, HARD_LIMIT_MS).unref();
+
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
