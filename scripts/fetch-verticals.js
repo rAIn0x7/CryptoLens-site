@@ -15,6 +15,20 @@ const supabase = createClient(
 
 const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genai.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+/* Gemini 调用必须有超时:实测过一次 job 卡了 5 小时(GitHub 默认允许 6h),
+   之后被后续调度取消 → 每次都给 Zion 发一封 cancelled 通知邮件。
+   SDK 本身不带超时,这里用 Promise.race 兜住,超时按"这批失败"处理走原有降级逻辑。 */
+const GEN_TIMEOUT_MS = 90000;
+async function genWithTimeout(prompt, label) {
+  let timer;
+  try {
+    return await Promise.race([
+      model.generateContent(prompt),
+      new Promise((_, rej) => { timer = setTimeout(() => rej(new Error(`Gemini timeout ${GEN_TIMEOUT_MS}ms (${label || 'gen'})`)), GEN_TIMEOUT_MS); }),
+    ]);
+  } finally { clearTimeout(timer); }
+}
 const parser = new Parser({ timeout: 10000 });
 
 const VERTICALS = [
@@ -124,7 +138,7 @@ Articles to analyze:
 ${list}`;
 
   try {
-    const result = await model.generateContent(prompt);
+    const result = await genWithTimeout(prompt);
     const text = result.response.text().trim().replace(/^```json\n?/, '').replace(/\n?```$/, '');
     const parsed = JSON.parse(text);
     if (!Array.isArray(parsed)) return articles.map(() => null);
@@ -173,7 +187,7 @@ Return ONLY valid JSON — no markdown, no explanation:
 }`;
 
   try {
-    const result = await model.generateContent(prompt);
+    const result = await genWithTimeout(prompt);
     const text = result.response.text().trim().replace(/^```json\n?/, '').replace(/\n?```$/, '');
     const parsed = JSON.parse(text);
     const valid = ['bullish', 'bearish', 'neutral', 'mixed'];
