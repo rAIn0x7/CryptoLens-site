@@ -1,0 +1,31 @@
+name: Keepalive
+
+# 保活：GitHub 对"仓库连续 60 天无活动"的定时 workflow 会自动禁用（2026-09-27 就因此断更过一次）。
+# 每月 1 日 UTC 02:30 推一个 .keepalive 变更，重置 60 天计时，防止 Fetch Articles 再被禁。
+on:
+  schedule:
+    - cron: '30 2 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Touch keepalive and push
+        run: |
+          echo "$(date -u +'%Y-%m-%d %H:%M UTC') heartbeat" > .keepalive
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .keepalive
+          if git diff --cached --quiet; then
+            echo "无变化，跳过"
+            exit 0
+          fi
+          git commit -m "chore: keepalive $(date -u +%F)"
+          git pull --rebase --autostash origin main
+          git push origin HEAD:main
